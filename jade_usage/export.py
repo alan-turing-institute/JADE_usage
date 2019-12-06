@@ -8,13 +8,16 @@ DELIMITER = ","
 
 def export(year, month):
     date_format = "%Y-%m-%d"
+    date_format_short = "%Y-%m"
     start = strftime(date_format, (year, month, 1, 0, 0, 0, 0, 1, -1))
     if month != 12:
         end = strftime(date_format, (year, month+1, 1, 0, 0, 0, 0, 1, -1))
     else:
         end = strftime(date_format, (year+1, 1, 1, 0, 0, 0, 0, 1, -1))
 
-    filename = "{}_usage.csv".format(start)
+    file_date = strftime(date_format_short,
+                         (year, month, 1, 0, 0, 0, 0, 1, -1))
+    filename = "{}_usage.csv".format(file_date)
     with open(filename, 'w') as outfile:
         run([
             "sacct",
