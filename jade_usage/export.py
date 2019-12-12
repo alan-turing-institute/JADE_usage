@@ -3,7 +3,7 @@ from time import strftime
 
 FORMAT = ("jobid,jobname,account,user,partition,nodelist,reqgres,allocgres,"
           "state,exitcode,elapsed,submit,start,end")
-DELIMITER = "|"
+DELIMITER = ","
 
 
 def export(year, month):
