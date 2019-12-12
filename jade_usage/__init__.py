@@ -1,3 +1,3 @@
-from .export import export
+from .export import export, fetch
 
-__all__ = ['export']
+__all__ = ['export', 'fetch']
