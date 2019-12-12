@@ -4,9 +4,10 @@ from time import strftime
 FORMAT = ("jobid,jobname,account,user,partition,nodelist,reqgres,allocgres,"
           "state,exitcode,elapsed,submit,start,end")
 DELIMITER = ","
+JADE_ADDRESS = "jade.hartree.stfc.ac.uk"
 
 
-def export(year, month):
+def export(user, year, month):
     date_format = "%Y-%m-%d"
     date_format_short = "%Y-%m"
     start = strftime(date_format, (year, month, 1, 0, 0, 0, 0, 1, -1))
@@ -19,12 +20,13 @@ def export(year, month):
                          (year, month, 1, 0, 0, 0, 0, 1, -1))
     filename = "{}_usage.csv".format(file_date)
     with open(filename, 'w') as outfile:
-        run([
-            "sacct",
-            "--allusers",
-            "--parsable2",
-            "--delimiter={}".format(DELIMITER),
-            "--starttime={}".format(start),
-            "--endtime={}".format(end),
-            "--format={}".format(FORMAT)
-            ], stdout=outfile)
+        run(["ssh",
+             "{user}@{jade}".format(user=user, jade=JADE_ADDRESS),
+             "sacct",
+             "--allusers",
+             "--parsable2",
+             "--delimiter={}".format(DELIMITER),
+             "--starttime={}".format(start),
+             "--endtime={}".format(end),
+             "--format={}".format(FORMAT)
+             ], stdout=outfile)
