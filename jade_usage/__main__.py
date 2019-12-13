@@ -21,19 +21,21 @@ def main():
         help="JADE username to attempt to login as"
         )
     export_parser.add_argument(
-        "date",
+        "start_date",
         type=str,
-        help="The month to export usage for in the format YYYY-MM"
+        help="The earliest date to export usage for in the format YYYY-MM-DD"
+        )
+    export_parser.add_argument(
+        "end_date",
+        type=str,
+        help="The latest date to export usage for in the format YYYY-MM-DD"
         )
 
     # Parse command line arguments
     clargs = parser.parse_args()
 
     if clargs.option == 'export':
-        year, month = clargs.date.split("-")
-        year = int(year)
-        month = int(month)
-        export.export(clargs.user, year, month)
+        export.export(clargs.user, clargs.start_date, clargs.end_date)
 
 
 if __name__ == "__main__":
