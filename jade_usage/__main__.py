@@ -35,7 +35,10 @@ def main():
     # Usage parser
     usage_parser = subparsers.add_parser(
         "usage",
-        description="Display or GPU hour totals per user or project"
+        description= (
+            "Display and export GPU hour usage per user, optionally filtered"
+            "by a list of usernames or accounts"
+            )
         )
     usage_parser.add_argument(
         "user",
@@ -64,6 +67,12 @@ def main():
         default=None,
         help="A comma seperated list of user names to filter usage by"
         )
+    usage_parser.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        help="Path or filename to write usage to"
+        )
 
     # Parse command line arguments
     clargs = parser.parse_args()
@@ -80,7 +89,7 @@ def main():
         else:
             users = None
         df = export.fetch(clargs.user, clargs.start_date, clargs.end_date)
-        usage.usage(df, accounts, users)
+        usage.usage(df, accounts, users, clargs.output)
 
 
 if __name__ == "__main__":

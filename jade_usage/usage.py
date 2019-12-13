@@ -14,7 +14,7 @@ def _gpu_hours(df):
     return GPU_hours
 
 
-def usage(df, accounts=None, users=None):
+def usage(df, accounts=None, users=None, export=None):
     """
     Determine usage from the data in a DataFrame
 
@@ -26,6 +26,8 @@ def usage(df, accounts=None, users=None):
             Default=None.
         users (:obj:`list` of :obj:`str`, optional): A list of users to
             include in the usage report. If None, all accounts are included.
+            Default=None.
+        export (str): Filename to store usage data per user to in csv format.
             Default=None.
     """
 
@@ -51,15 +53,23 @@ def usage(df, accounts=None, users=None):
         # Remove invalid names
         users = [elem for elem in users if type(elem) == str]
 
+    # Get total GPU hours for selected users/accounts
     gpu_hours = _gpu_hours(usage)
+    # Get GPU hours for ALL of JADE
     gpu_hours_total = _gpu_hours(usage_total)
 
-    output = []
+    # Get GPU hours per user
+    user_df = []
     for user in users:
         gpu_hours_user = _gpu_hours(usage[usage.User == user])
-        output.append((user, gpu_hours_user))
-    output = pd.DataFrame(output, columns=["user", "usage"])
+        user_df.append((user, gpu_hours_user))
+    user_df = pd.DataFrame(user_df, columns=["user", "usage"])
 
-    print(tabulate(output, headers="keys", showindex=False, tablefmt="github"))
+    # Write human readable summary to stdout
+    print(tabulate(user_df, headers="keys", showindex=False, tablefmt="github"))
     print("All users GPU hours: {:<,.2f}".format(gpu_hours))
     print("Total JADE GPU hours: {:<,.2f}".format(gpu_hours_total))
+
+    # If seleced, write data to a file
+    if export:
+        user_df.to_csv(export, index=False)
