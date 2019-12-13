@@ -1,8 +1,10 @@
+from io import StringIO
+import pandas as pd
 from subprocess import run
 
 FORMAT = ("jobid,jobname,account,user,partition,nodelist,reqgres,allocgres,"
           "state,exitcode,elapsed,submit,start,end")
-DELIMITER = ","
+DELIMITER = "|"
 JADE_ADDRESS = "jade.hartree.stfc.ac.uk"
 
 
@@ -18,14 +20,16 @@ def fetch(user, start_date, end_date):
             YYYY-MM-DD.
 
     Returns:
-        (str): The output of sacct as a string.
+        (:obj:`DataFrame`): The output of sacct as a pandas Dataframe.
     """
+
+    # Get usage data
     result = run(["ssh",
                   "{user}@{jade}".format(user=user, jade=JADE_ADDRESS),
                   "sacct",
                   "--allusers",
                   "--parsable2",
-                  "--delimiter={}".format(DELIMITER),
+                  "--delimiter='{}'".format(DELIMITER),
                   "--starttime={}".format(start_date),
                   "--endtime={}".format(end_date),
                   "--format={}".format(FORMAT)
@@ -34,13 +38,37 @@ def fetch(user, start_date, end_date):
     if result.returncode != 0:
         raise FetchError(result)
 
-    return result.stdout
+    f = StringIO()
+    f.write(result.stdout)
+    f.seek(0)
+    # Declare columns to convert. Cast Elapsed column as a Timedelta
+    converters = {
+        'Elapsed': pd.Timedelta
+        }
+    # Declare columns to parse as Datetime objects
+    date_columns = [
+        'Submit',
+        'Start',
+        'End'
+        ]
+    # Create Dataframe
+    df = pd.read_csv(
+        f,
+        sep=DELIMITER,
+        header=0,
+        converters=converters,
+        parse_dates=date_columns,
+        infer_datetime_format=True,
+        dayfirst=False
+        )
+
+    return df
 
 
 def export(user, start_date, end_date):
     """
-    Export usage data from JADE to a csv file. The data is written to a file
-    named {start_date}-{end_date}_usage.csv
+    Export usage data from JADE to a 'csv' file (although the delimiter is
+    '|'). The data is written to a file named {start_date}-{end_date}_usage.csv
 
     This function uses fetch.
 
@@ -53,8 +81,8 @@ def export(user, start_date, end_date):
     """
     filename = "{}-{}_usage.csv".format(start_date, end_date)
 
-    with open(filename, "w") as outfile:
-        outfile.write(fetch(user, start_date, end_date))
+    df = fetch(user, start_date, end_date)
+    df.to_csv(filename, sep=DELIMITER, index=False)
 
 
 class FetchError(Exception):
