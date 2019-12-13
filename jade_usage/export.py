@@ -29,6 +29,7 @@ def fetch(user, start_date, end_date):
                   "sacct",
                   "--allusers",
                   "--parsable2",
+                  "--allocations",
                   "--delimiter='{}'".format(DELIMITER),
                   "--starttime={}".format(start_date),
                   "--endtime={}".format(end_date),
