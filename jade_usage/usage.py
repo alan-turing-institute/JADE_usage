@@ -61,5 +61,5 @@ def usage(df, accounts=None, users=None):
     output = pd.DataFrame(output, columns=["user", "usage"])
 
     print(tabulate(output, headers="keys", showindex=False, tablefmt="github"))
-    print("All users usage: {}".format(gpu_hours))
-    print("Total JADE usage: {}".format(gpu_hours_total))
+    print("All users GPU hours: {:<,.2f}".format(gpu_hours))
+    print("Total JADE GPU hours: {:<,.2f}".format(gpu_hours_total))
