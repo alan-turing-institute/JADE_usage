@@ -7,6 +7,7 @@ FORMAT = ("jobid,jobname,account,user,partition,nodelist,reqgres,allocgres,"
 DELIMITER = "|"
 JADE_ADDRESS = "jade.hartree.stfc.ac.uk"
 
+
 def _elapsed(string):
     """
     Convert an elapsed time string as output by sacct to a pandas Timedelta
@@ -23,6 +24,7 @@ def _elapsed(string):
         hours, minutes, seconds = s[0].split(":")
         return pd.Timedelta(hours=int(hours), minutes=int(minutes),
                             seconds=int(seconds))
+
 
 def fetch(user, start_date, end_date):
     """

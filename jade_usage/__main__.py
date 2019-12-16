@@ -35,7 +35,7 @@ def main():
     # Usage parser
     usage_parser = subparsers.add_parser(
         "usage",
-        description= (
+        description=(
             "Display and export GPU hour usage per user, optionally filtered"
             "by a list of usernames or accounts"
             )

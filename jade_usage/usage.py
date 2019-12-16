@@ -66,7 +66,8 @@ def usage(df, accounts=None, users=None, export=None):
     user_df = pd.DataFrame(user_df, columns=["user", "usage"])
 
     # Write human readable summary to stdout
-    print(tabulate(user_df, headers="keys", showindex=False, tablefmt="github"))
+    print(tabulate(user_df, headers="keys", showindex=False,
+                   tablefmt="github"))
     print("All users GPU hours: {:<,.2f}".format(gpu_hours))
     print("Total JADE GPU hours: {:<,.2f}".format(gpu_hours_total))
 
