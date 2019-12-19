@@ -1,9 +1,12 @@
+from datetime import datetime
 from io import StringIO
 import pandas as pd
 from subprocess import run
 
 FORMAT = ("jobid,jobname,account,user,partition,nodelist,reqgres,allocgres,"
           "state,exitcode,elapsed,submit,start,end")
+STATES = ("CANCELLED,COMPLETED,COMPLETING,FAILED,NODE_FAIL,PREEMPTED,RESIZING,"
+          "TIMEOUT")
 DELIMITER = "|"
 JADE_ADDRESS = "jade.hartree.stfc.ac.uk"
 
@@ -11,8 +14,9 @@ JADE_ADDRESS = "jade.hartree.stfc.ac.uk"
 def _elapsed(string):
     """
     Convert an elapsed time string as output by sacct to a pandas Timedelta
-    object
+    object.
     """
+    # Elapsed times are in the format [days-]HH:MM:SS[.microseconds]
     # split days from HH:MM:SS
     s = string.split("-")
     if len(s) == 2:
@@ -54,6 +58,7 @@ def fetch(user, start_date, end_date):
                   "--delimiter='{}'".format(DELIMITER),
                   "--starttime={}".format(start_date),
                   "--endtime={}".format(end_date),
+                  "--state={}".format(STATES),
                   "--format={}".format(FORMAT)
                   ], capture_output=True, text=True)
 
