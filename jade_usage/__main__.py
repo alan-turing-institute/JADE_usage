@@ -1,5 +1,4 @@
-from . import export
-from . import import_csv
+from . import data
 from . import usage
 import argparse
 
@@ -89,7 +88,7 @@ def main():
     clargs = parser.parse_args()
 
     if clargs.option == 'export':
-        export.export(clargs.user, clargs.start_date, clargs.end_date)
+        data.export(clargs.user, clargs.start_date, clargs.end_date)
     elif clargs.option == 'usage':
         if clargs.accounts:
             accounts = clargs.accounts.split(",")
@@ -104,9 +103,9 @@ def main():
             raise Exception("Only one of --user and --file should be defined")
 
         if clargs.user:
-            df = export.fetch(clargs.user, clargs.start_date, clargs.end_date)
+            df = data.fetch(clargs.user, clargs.start_date, clargs.end_date)
         elif clargs.file:
-            df = import_csv.import_csv(clargs.file)
+            df = data.import_csv(clargs.file)
         else:
             raise Exception("One of --user and --file should be defined")
         usage.usage(df, accounts, users, clargs.output)

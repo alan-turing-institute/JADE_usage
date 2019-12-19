@@ -87,6 +87,20 @@ def fetch(user, start_date, end_date):
     return df
 
 
+class FetchError(Exception):
+    """
+    Exception raised when fetch fails
+    """
+    def __init__(self, result):
+        message = (
+            "Non zero return code when attempting to execute sacct over ssh\n"
+            "command: {}\n".format(" ".join(result.args))
+            + "return code: {}\n".format(result.returncode)
+            + "stderr: {}\n".format(result.stderr)
+        )
+        super().__init__(message)
+
+
 def export(user, start_date, end_date):
     """
     Export usage data from JADE to a 'csv' file (although the delimiter is
@@ -107,15 +121,44 @@ def export(user, start_date, end_date):
     df.to_csv(filename, sep=DELIMITER, index=False)
 
 
-class FetchError(Exception):
+def _get_dataframe(infile):
     """
-    Exception raised when fetch fails
+    Create a DataFrame from a single csv.
     """
-    def __init__(self, result):
-        message = (
-            "Non zero return code when attempting to execute sacct over ssh\n"
-            "command: {}\n".format(" ".join(result.args))
-            + "return code: {}\n".format(result.returncode)
-            + "stderr: {}\n".format(result.stderr)
+    converters = {
+        'Elapsed': pd.Timedelta
+        }
+    date_columns = [
+        'Submit',
+        'Start',
+        'End'
+        ]
+    df = pd.read_csv(
+        infile,
+        sep=DELIMITER,
+        header=0,
+        converters=converters,
+        parse_dates=date_columns,
+        infer_datetime_format=True,
+        dayfirst=False
         )
-        super().__init__(message)
+
+    return df
+
+
+def import_csv(infile):
+    """
+    Get a usage DataFrame from a csv, or set of csvs in the format produced by
+    the export command.
+
+    Args:
+        infile (str or :obj:`list` of str): The paths of the file or files to
+        import.
+
+    Returns:
+        (:obj:`DataFrame`): The output of sacct as a pandas Dataframe.
+    """
+    if type(infile) == list:
+        return pd.concat([_get_dataframe(f) for f in infile])
+    elif type(infile) == str:
+        return _get_dataframe(infile)
