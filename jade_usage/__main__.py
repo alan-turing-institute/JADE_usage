@@ -1,4 +1,5 @@
 from . import export
+from . import import_csv
 from . import usage
 import argparse
 
@@ -41,11 +42,6 @@ def main():
             )
         )
     usage_parser.add_argument(
-        "user",
-        type=str,
-        help="JADE username to attempt to login as"
-        )
-    usage_parser.add_argument(
         "start_date",
         type=str,
         help="The earliest date to export usage for in the format YYYY-MM-DD"
@@ -54,6 +50,21 @@ def main():
         "end_date",
         type=str,
         help="The latest date to export usage for in the format YYYY-MM-DD"
+        )
+    usage_parser.add_argument(
+        "--user",
+        type=str,
+        default=None,
+        help=("JADE username to attempt to login as, if used usage data is"
+              "fetched from JADE. Incompatible with --file")
+        )
+    usage_parser.add_argument(
+        "--file",
+        type=str,
+        nargs='*',
+        default=None,
+        help=("A file, or list of files, containing usage data in the format"
+              "created by the export command. Incompatible with --user")
         )
     usage_parser.add_argument(
         "--accounts",
@@ -88,7 +99,16 @@ def main():
             users = clargs.users.split(",")
         else:
             users = None
-        df = export.fetch(clargs.user, clargs.start_date, clargs.end_date)
+
+        if (clargs.user is not None) and (clargs.file is not None):
+            raise Exception("Only one of --user and --file should be defined")
+
+        if clargs.user:
+            df = export.fetch(clargs.user, clargs.start_date, clargs.end_date)
+        elif clargs.file:
+            df = import_csv.import_csv(clargs.file)
+        else:
+            raise Exception("One of --user and --file should be defined")
         usage.usage(df, accounts, users, clargs.output)
 
 

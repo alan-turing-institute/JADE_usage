@@ -39,6 +39,9 @@ def fetch(user, start_date, end_date):
 
     Returns:
         (:obj:`DataFrame`): The output of sacct as a pandas Dataframe.
+
+    Raises:
+        FetchError: If the ssh or sacct command return an error.
     """
 
     # Get usage data
