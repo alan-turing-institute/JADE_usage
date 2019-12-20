@@ -14,7 +14,8 @@ def main():
     # Export parser
     export_parser = subparsers.add_parser(
         "export",
-        description="Export all usage data in a period to a csv file"
+        help="Export job data",
+        description="Export all job data in a period to a csv file"
         )
     export_parser.add_argument(
         "user",
@@ -24,17 +25,18 @@ def main():
     export_parser.add_argument(
         "start_date",
         type=str,
-        help="The earliest date to export usage for in the format YYYY-MM-DD"
+        help="The earliest date to export data for in the format YYYY-MM-DD"
         )
     export_parser.add_argument(
         "end_date",
         type=str,
-        help="The latest date to export usage for in the format YYYY-MM-DD"
+        help="The latest date to export data for in the format YYYY-MM-DD"
         )
 
     # Usage parser
     usage_parser = subparsers.add_parser(
         "usage",
+        help="Display and export usage",
         description=(
             "Display and export GPU hour usage per user, optionally filtered"
             "by a list of usernames or accounts"
