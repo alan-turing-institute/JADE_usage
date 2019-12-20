@@ -31,14 +31,7 @@ def usage(df, accounts=None, users=None, export=None):
             Default=None.
     """
 
-    # Filter PENDING jobs
-    usage_total = df[df.State != "PENDING"]
-    # Filter bad GRES column entries
-    # Entries should be of the format 'gpu:N' where 0<N<9 is the number of GPUs
-    # allcoated
-    usage_total = usage_total[usage_total.AllocGRES.isin(
-        ["gpu:{}".format(i) for i in range(1, 9)])]
-
+    usage_total = df
     usage = usage_total
     # Filter by accounts
     if accounts:
@@ -50,8 +43,6 @@ def usage(df, accounts=None, users=None, export=None):
     else:
         # Get all unique user names if a list was not supplied
         users = list(usage.User.unique())
-        # Remove invalid names
-        users = [elem for elem in users if type(elem) == str]
 
     # Get total GPU hours for selected users/accounts
     gpu_hours = _gpu_hours(usage)
