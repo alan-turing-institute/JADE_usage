@@ -34,6 +34,9 @@ def _fetch_filter(df):
     # Remove jobs with no nodes
     df = df[df.NodeList != "None assigned"]
 
+    # Rmove jobs with no GPUs
+    df = df[df.AllocGRES.notna()]
+
     return df
 
 
@@ -169,7 +172,6 @@ def _get_dataframe(infile):
         converters=converters,
         parse_dates=date_columns,
         infer_datetime_format=True,
-        dayfirst=False
         )
 
     return df
