@@ -9,7 +9,7 @@ def _gpu_hours(df):
     # elapsed number of hours
     GPU_hours = sum(
         df.AllocGRES.apply(lambda x: int(x[-1]))
-        * df.Elapsed.apply(lambda x: x.seconds / seconds_per_hour)
+        * df.Elapsed.apply(lambda x: x.total_seconds() / seconds_per_hour)
         )
     return GPU_hours
 
