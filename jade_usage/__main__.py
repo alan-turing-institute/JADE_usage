@@ -68,14 +68,16 @@ def main():
     usage_parser.add_argument(
         "--accounts",
         type=str,
+        nargs='*',
         default=None,
-        help="A comma seperated list of accounts to filter usage by"
+        help="Accounts to filter usage by"
         )
     usage_parser.add_argument(
         "--users",
         type=str,
+        nargs='*',
         default=None,
-        help="A comma seperated list of user names to filter usage by"
+        help="User names to filter usage by"
         )
     usage_parser.add_argument(
         "--output",
@@ -90,15 +92,6 @@ def main():
     if clargs.option == 'export':
         data.export(clargs.user, clargs.start_date, clargs.end_date)
     elif clargs.option == 'usage':
-        if clargs.accounts:
-            accounts = clargs.accounts.split(",")
-        else:
-            accounts = None
-        if clargs.users:
-            users = clargs.users.split(",")
-        else:
-            users = None
-
         if (clargs.user is not None) and (clargs.file is not None):
             raise Exception("Only one of --user and --file should be defined")
 
@@ -108,7 +101,7 @@ def main():
             df = data.import_csv(clargs.file)
         else:
             raise Exception("One of --user and --file should be defined")
-        usage.usage(df, accounts, users, clargs.output)
+        usage.usage(df, clargs.accounts, clargs.users, clargs.output)
 
 
 if __name__ == "__main__":
