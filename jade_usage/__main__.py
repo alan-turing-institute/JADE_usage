@@ -9,7 +9,13 @@ def main():
         description="Fetch and process usage data from JADE"
         )
     # Add subparsers, sending the chose subparser to 'option'
-    subparsers = parser.add_subparsers(dest='option')
+    subparsers = parser.add_subparsers(
+        description=(
+            "run jade-usage <subcommand> -h for help with each subcommand"
+            ),
+        dest='option',
+        required=True
+        )
 
     # Export parser
     export_parser = subparsers.add_parser(
