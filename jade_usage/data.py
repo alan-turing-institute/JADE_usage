@@ -1,4 +1,3 @@
-from datetime import datetime
 from io import StringIO
 import pandas as pd
 from subprocess import run
@@ -26,6 +25,16 @@ def _elapsed(string):
         hours, minutes, seconds = s[0].split(":")
         return pd.Timedelta(hours=int(hours), minutes=int(minutes),
                             seconds=int(seconds))
+
+
+def _fetch_filter(df):
+    """
+    Filter the fetched DataFrame for unwanted and uneeded records
+    """
+    # Remove jobs with no nodes
+    df = df[df.NodeList != "None assigned"]
+
+    return df
 
 
 def fetch(user, start_date, end_date):
@@ -101,8 +110,8 @@ def fetch(user, start_date, end_date):
         converters=converters,
         parse_dates=date_columns,
         infer_datetime_format=True,
-        dayfirst=False
         )
+    df = _fetch_filter(df)
 
     return df
 
