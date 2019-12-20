@@ -39,7 +39,7 @@ def usage(df, accounts=None, users=None, export=None):
 
     # Filter by user names
     if users:
-        usage = usage[usage.Account.isin(users)]
+        usage = usage[usage.User.isin(users)]
     else:
         # Get all unique user names if a list was not supplied
         users = list(usage.User.unique())
