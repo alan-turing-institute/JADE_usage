@@ -44,6 +44,11 @@ def usage(df, accounts=None, users=None, export=None):
         # Get all unique user names if a list was not supplied
         users = list(usage.User.unique())
 
+    # Ensure usage DataFrame is not empty before continuing
+    if usage.empty:
+        print("No usage for the specified dates, accounts, users")
+        return
+
     # Get total GPU hours for selected users/accounts
     gpu_hours = _gpu_hours(usage)
     # Get GPU hours for ALL of JADE
