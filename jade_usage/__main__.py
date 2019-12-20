@@ -99,6 +99,7 @@ def main():
             df = data.fetch(clargs.user, clargs.start_date, clargs.end_date)
         elif clargs.file:
             df = data.import_csv(clargs.file)
+            df = data.filter_dates(df, clargs.start_date, clargs.end_date)
         else:
             raise Exception("One of --user and --file should be defined")
         usage.usage(df, clargs.accounts, clargs.users, clargs.output)

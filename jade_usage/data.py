@@ -1,3 +1,4 @@
+from datetime import datetime
 from io import StringIO
 import pandas as pd
 from subprocess import run
@@ -193,3 +194,13 @@ def import_csv(infile):
         return pd.concat([_get_dataframe(f) for f in infile])
     elif type(infile) == str:
         return _get_dataframe(infile)
+
+
+def filter_dates(df, start_date, end_date):
+    start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+
+    df = df[df.Start >= start_date]
+    df = df[df.End <= end_date]
+
+    return df
