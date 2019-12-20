@@ -59,7 +59,7 @@ def usage(df, accounts=None, users=None, export=None):
     for user in users:
         gpu_hours_user = _gpu_hours(usage[usage.User == user])
         user_df.append((user, gpu_hours_user))
-    user_df = pd.DataFrame(user_df, columns=["user", "usage"])
+    user_df = pd.DataFrame(user_df, columns=["user", "usage/GPUh"])
 
     # Write human readable summary to stdout
     print(tabulate(user_df, headers="keys", showindex=False,
