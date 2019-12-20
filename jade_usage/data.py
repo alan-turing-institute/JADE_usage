@@ -5,8 +5,6 @@ from subprocess import run
 
 FORMAT = ("jobid,jobname,account,user,partition,nodelist,reqgres,allocgres,"
           "state,exitcode,elapsed,submit,start,end")
-STATES = ("CANCELLED,COMPLETED,COMPLETING,FAILED,NODE_FAIL,PREEMPTED,RESIZING,"
-          "TIMEOUT")
 DELIMITER = "|"
 JADE_ADDRESS = "jade.hartree.stfc.ac.uk"
 
@@ -48,17 +46,34 @@ def fetch(user, start_date, end_date):
         FetchError: If the ssh or sacct command return an error.
     """
 
-    # Get usage data
+    # Get job data
     result = run(["ssh",
                   "{user}@{jade}".format(user=user, jade=JADE_ADDRESS),
                   "sacct",
+                  # Get job data for all users
                   "--allusers",
+                  # Output data in a parsable 'csv' format without a delimiter
+                  # at the end of lines
                   "--parsable2",
+                  # Show only the cumulative statistics for each job (this
+                  # prevents double counting elapsed time for batch or
+                  # multi-stage jobs)
                   "--allocations",
                   "--delimiter='{}'".format(DELIMITER),
+                  # When used with starttime and endtime, only jobs that were
+                  # in the RUNNING state between these times. That is, only
+                  # jobs which had acrued GPU usage between these times.
+                  "--state=RUNNING",
                   "--starttime={}".format(start_date),
                   "--endtime={}".format(end_date),
-                  "--state={}".format(STATES),
+                  # Ensure that if the job started before starttime, and/or
+                  # ended after endtime that the Start and End fields are
+                  # truncated to show starttime and endtime respectively
+                  # (Elapsed time is also corrected to be endtime-starttime).
+                  # This ensures that only usage between starttime and endtime
+                  # is displayed and prevents double counting usage when a job
+                  # runs over the start and end time boundaries.
+                  "--truncate",
                   "--format={}".format(FORMAT)
                   ], capture_output=True, text=True)
 
