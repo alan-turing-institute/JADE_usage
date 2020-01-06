@@ -45,6 +45,23 @@ def _print_human_readable_table(df):
     print("\n")
 
 
+def _get_usage_by(df, column):
+    """
+    Product a Dataframe of GPU usage per each unique value in a column. For
+    example, usage per user or account.
+    """
+
+    unique = list(df[column].unique())
+    usage = []
+    for value in unique:
+        gpu_hours_user = _gpu_hours(df[df[column] == value])
+        usage.append((value, gpu_hours_user))
+    usage = pd.DataFrame(usage, columns=[column, "Usage/GPUh"])
+    usage.sort_values("Usage/GPUh", ascending=False, inplace=True)
+
+    return usage
+
+
 def usage(df, accounts=None, users=None, export=None):
     """
     Determine usage from the data in a DataFrame
@@ -88,30 +105,11 @@ def usage(df, accounts=None, users=None, export=None):
     # Get GPU hours for ALL of JADE
     gpu_hours_total = _gpu_hours(usage_total)
 
-    # Get GPU hours per user
-    user_df = []
-    for user in users:
-        gpu_hours_user = _gpu_hours(usage[usage.User == user])
-        user_df.append((user, gpu_hours_user))
-    user_df = pd.DataFrame(user_df, columns=["user", "usage/GPUh"])
-    user_df.sort_values("usage/GPUh", ascending=False, inplace=True)
-
-    # Get GPU hours per group
+    # Get GPU hours per user, group and account
     groups, usage = _get_groups(users, usage)
-    group_df = []
-    for group in groups:
-        gpu_hours_group = _gpu_hours(usage[usage.Group == group])
-        group_df.append((group, gpu_hours_group))
-    group_df = pd.DataFrame(group_df, columns=["group", "usage/GPUh"])
-    group_df.sort_values("usage/GPUh", ascending=False, inplace=True)
-
-    # Get GPU hours per account
-    account_df = []
-    for account in accounts:
-        gpu_hours_account = _gpu_hours(usage[usage.Account == account])
-        account_df.append((account, gpu_hours_account))
-    account_df = pd.DataFrame(account_df, columns=["account", "usage/GPUh"])
-    account_df.sort_values("usage/GPUh", ascending=False, inplace=True)
+    user_df = _get_usage_by(usage, "User")
+    group_df = _get_usage_by(usage, "Group")
+    account_df = _get_usage_by(usage, "Account")
 
     # Write human readable summary to stdout
     for df in [user_df, group_df, account_df]:
