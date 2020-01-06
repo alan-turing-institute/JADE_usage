@@ -91,7 +91,7 @@ def main():
         "--output",
         type=str,
         default=None,
-        help="Path or filename to write usage to"
+        help="Filename prefix to write usage to"
         )
 
     # Parse command line arguments
