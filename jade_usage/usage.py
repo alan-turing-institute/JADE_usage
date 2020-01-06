@@ -37,6 +37,14 @@ def _get_groups(users, df):
     return groups, df
 
 
+def _print_human_readable_table(df):
+    """
+    Print a DataFrame in a human readable, markdown format
+    """
+    print(tabulate(df, headers="keys", showindex=False, tablefmt="github"))
+    print("\n")
+
+
 def usage(df, accounts=None, users=None, export=None):
     """
     Determine usage from the data in a DataFrame
@@ -106,15 +114,10 @@ def usage(df, accounts=None, users=None, export=None):
     account_df.sort_values("usage/GPUh", ascending=False, inplace=True)
 
     # Write human readable summary to stdout
-    print(tabulate(user_df, headers="keys", showindex=False,
-                   tablefmt="github"))
-    print("\n")
-    print(tabulate(group_df, headers="keys", showindex=False,
-                   tablefmt="github"))
-    print("\n")
-    print(tabulate(account_df, headers="keys", showindex=False,
-                   tablefmt="github"))
-    print("\n")
+    for df in [user_df, group_df, account_df]:
+        _print_human_readable_table(df)
+
+    # Write totals to stdour
     print("Total selected GPU hours: {:<,.2f}".format(gpu_hours))
     print("Total JADE GPU hours: {:<,.2f}".format(gpu_hours_total))
 
