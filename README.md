@@ -1,6 +1,5 @@
 # JADE_usage
 [![Build Status](https://travis-ci.com/alan-turing-institute/JADE_usage.svg?branch=master)](https://travis-ci.com/alan-turing-institute/JADE_usage)
-[![Build Status](https://travis-ci.com/alan-turing-institute/JADE_usage.svg?branch=dev)](https://travis-ci.com/alan-turing-institute/JADE_usage)
 
 A command line utility for exporting and analysing usage on [JADE](jade.ac.uk).
 
