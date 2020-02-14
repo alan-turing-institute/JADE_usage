@@ -32,9 +32,6 @@ def _fetch_filter(df):
     """
     Filter the fetched DataFrame for unwanted and uneeded records
     """
-    # Remove jobs with no nodes
-    df = df[df.NodeList != "None assigned"]
-
     # Rmove jobs with no GPUs
     df = df[df.AllocGRES.notna()]
 
