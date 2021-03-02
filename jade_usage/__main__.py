@@ -3,7 +3,7 @@ from . import usage
 import argparse
 
 
-def main():
+def get_cl_args():
     # Create argument parser
     parser = argparse.ArgumentParser(
         description="Fetch and process usage data from JADE"
@@ -107,7 +107,11 @@ def main():
         )
 
     # Parse command line arguments
-    clargs = parser.parse_args()
+    return parser.parse_args()
+
+
+def main():
+    clargs = get_cl_args()
 
     if clargs.option == 'export':
         data.export(clargs.cluster, clargs.user, clargs.start_date,
