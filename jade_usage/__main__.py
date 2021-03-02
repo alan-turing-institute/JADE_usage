@@ -13,13 +13,13 @@ def get_cl_args():
     # Create parent parser for date range
     parent_dates = argparse.ArgumentParser(add_help=False)
     parent_dates.add_argument(
-        "start_date",
+        "start",
         type=date.fromisoformat,
         help=("The earliest date (inclusive) to export data for in iso format"
               " (YYYY-MM-DD)")
     )
     parent_dates.add_argument(
-        "end_date",
+        "end",
         type=date.fromisoformat,
         help=("The latest date (exclusive) to export data for in iso format"
               " (YYYY-MM-DD)")
@@ -90,13 +90,12 @@ def get_cl_args():
 
 
 def export_command(args):
-    data.export(args.cluster, args.user, args.start_date,
-                args.end_date)
+    data.export(args.cluster, args.user, args.start, args.end)
 
 
 def usage_command(args):
     df = data.import_csv(args.files)
-    df = data.filter_dates(df, args.start_date, args.end_date)
+    df = data.filter_dates(df, args.start, args.end)
     usage.usage(df, args.accounts, args.users)
 
 

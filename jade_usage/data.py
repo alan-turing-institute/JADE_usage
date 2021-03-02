@@ -41,15 +41,15 @@ def _fetch_filter(df):
     return df
 
 
-def fetch(cluster, user, start_date, end_date):
+def fetch(cluster, user, start, end):
     """
     Fetch usage data from JADE using the 'sacct' command over SSH.
 
     Args:
         cluster (str): The cluster to fetch data from. One of 'jade' or 'jade2'
         user (str): The username to attempt to login as.
-        start_date (:obj:`datetime.date`): The earliest date to get usage for.
-        end_date (:obj:`datetime.date`): The latest date to get usage for.
+        start (:obj:`datetime.date`): The earliest date to get usage for.
+        end (:obj:`datetime.date`): The latest date to get usage for.
 
     Returns:
         (:obj:`DataFrame`): The output of sacct as a pandas Dataframe.
@@ -76,8 +76,8 @@ def fetch(cluster, user, start_date, end_date):
                   # in the RUNNING state between these times. That is, only
                   # jobs which had acrued GPU usage between these times.
                   "--state=RUNNING",
-                  f"--starttime={start_date}",
-                  f"--endtime={end_date}",
+                  f"--starttime={start}",
+                  f"--endtime={end}",
                   # Ensure that if the job started before starttime, and/or
                   # ended after endtime that the Start and End fields are
                   # truncated to show starttime and endtime respectively
@@ -133,22 +133,22 @@ class FetchError(Exception):
         super().__init__(message)
 
 
-def export(cluster, user, start_date, end_date):
+def export(cluster, user, start, end):
     """
     Export usage data from JADE to a 'csv' file (although the delimiter is
-    '|'). The data is written to a file named {start_date}-{end_date}_usage.csv
+    '|'). The data is written to a file named {start}-{end}_usage.csv
 
     This function uses fetch.
 
     Args:
         cluster (str): The cluster to fetch data from. One of 'jade' or 'jade2'
         user (str): The username to attempt to login as.
-        start_date (:obj:`datetime.date`): The earliest date to get usage for.
-        end_date (:obj:`datetime.date`): The latest date to get usage for.
+        start (:obj:`datetime.date`): The earliest date to get usage for.
+        end (:obj:`datetime.date`): The latest date to get usage for.
     """
-    filename = f"{start_date}-{end_date}_usage.csv"
+    filename = f"{start}-{end}_usage.csv"
 
-    df = fetch(cluster, user, start_date, end_date)
+    df = fetch(cluster, user, start, end)
     df.to_csv(filename, sep=DELIMITER, index=False)
 
 
@@ -194,9 +194,9 @@ def import_csv(infile):
         return _get_dataframe(infile)
 
 
-def filter_dates(df, start_date, end_date):
-    start = datetime.combine(start_date, datetime.min.time())
-    end = datetime.combine(end_date, datetime.min.time())
+def filter_dates(df, start, end):
+    start = datetime.combine(start, datetime.min.time())
+    end = datetime.combine(end, datetime.min.time())
 
     df = df[df.Start >= start]
     df = df[df.End <= end]
