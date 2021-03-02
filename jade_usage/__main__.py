@@ -24,6 +24,12 @@ def main():
         description="Export all job data in a period to a csv file"
         )
     export_parser.add_argument(
+        "cluster",
+        type=str,
+        choices=["jade", "jade2"],
+        help="Cluster to export data from. One of 'jade' or 'jade2'"
+    )
+    export_parser.add_argument(
         "user",
         type=str,
         help="JADE username to attempt to login as"
@@ -58,6 +64,12 @@ def main():
         type=str,
         help="The latest date to export usage for in the format YYYY-MM-DD"
         )
+    usage_parser.add_argument(
+        "--cluster",
+        type=str,
+        choices=["jade", "jade2"],
+        help="Cluster to export data from. One of 'jade' or 'jade2'"
+    )
     usage_parser.add_argument(
         "--user",
         type=str,
@@ -98,13 +110,15 @@ def main():
     clargs = parser.parse_args()
 
     if clargs.option == 'export':
-        data.export(clargs.user, clargs.start_date, clargs.end_date)
+        data.export(clargs.cluster, clargs.user, clargs.start_date,
+                    clargs.end_date)
     elif clargs.option == 'usage':
         if (clargs.user is not None) and (clargs.file is not None):
             raise Exception("Only one of --user and --file should be defined")
 
         if clargs.user:
-            df = data.fetch(clargs.user, clargs.start_date, clargs.end_date)
+            df = data.fetch(clargs.cluster, clargs.user, clargs.start_date,
+                            clargs.end_date)
         elif clargs.file:
             df = data.import_csv(clargs.file)
             df = data.filter_dates(df, clargs.start_date, clargs.end_date)

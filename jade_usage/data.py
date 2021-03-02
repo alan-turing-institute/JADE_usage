@@ -33,7 +33,7 @@ def _elapsed(string):
 
 def _fetch_filter(df):
     """
-    Filter the fetched DataFrame for unwanted and uneeded records
+    Filter the fetched DataFrame for unwanted and unnecessary records
     """
     # Rmove jobs with no GPUs
     df = df[df.AllocGRES.notna()]
@@ -41,11 +41,12 @@ def _fetch_filter(df):
     return df
 
 
-def fetch(user, cluster, start_date, end_date):
+def fetch(cluster, user, start_date, end_date):
     """
     Fetch usage data from JADE using the 'sacct' command over SSH.
 
     Args:
+        cluster (str): The cluster to fetch data from. One of 'jade' or 'jade2'
         user (str): The username to attempt to login as.
         start_date (str): The earliest date to get usage for in the format
             YYYY-MM-DD.
@@ -72,13 +73,13 @@ def fetch(user, cluster, start_date, end_date):
                   # prevents double counting elapsed time for batch or
                   # multi-stage jobs)
                   "--allocations",
-                  f"--delimiter='{DELIMITER}'"
+                  f"--delimiter='{DELIMITER}'",
                   # When used with starttime and endtime, only jobs that were
                   # in the RUNNING state between these times. That is, only
                   # jobs which had acrued GPU usage between these times.
                   "--state=RUNNING",
-                  f"--starttime={start_date}"
-                  f"--endtime={end_date}"
+                  f"--starttime={start_date}",
+                  f"--endtime={end_date}",
                   # Ensure that if the job started before starttime, and/or
                   # ended after endtime that the Start and End fields are
                   # truncated to show starttime and endtime respectively
@@ -134,7 +135,7 @@ class FetchError(Exception):
         super().__init__(message)
 
 
-def export(user, start_date, end_date):
+def export(cluster, user, start_date, end_date):
     """
     Export usage data from JADE to a 'csv' file (although the delimiter is
     '|'). The data is written to a file named {start_date}-{end_date}_usage.csv
@@ -150,7 +151,7 @@ def export(user, start_date, end_date):
     """
     filename = f"{start_date}-{end_date}_usage.csv"
 
-    df = fetch(user, start_date, end_date)
+    df = fetch(cluster, user, start_date, end_date)
     df.to_csv(filename, sep=DELIMITER, index=False)
 
 
