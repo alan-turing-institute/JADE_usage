@@ -25,12 +25,11 @@ def get_cl_args():
               " (YYYY-MM-DD)")
     )
 
-    # Add subparsers, sending the chose subparser to 'option'
+    # Add subparsers
     subparsers = parser.add_subparsers(
         description=(
             "run jade-usage <subcommand> -h for help with each subcommand"
             ),
-        dest='option',
         required=True
         )
 
@@ -52,6 +51,7 @@ def get_cl_args():
         type=str,
         help="JADE username to attempt to login as"
         )
+    export_parser.set_defaults(func=export_command)
 
     # Usage parser
     usage_parser = subparsers.add_parser(
@@ -89,21 +89,27 @@ def get_cl_args():
         default=None,
         help="Filename prefix to write usage to"
         )
+    usage_parser.set_defaults(func=usage_command)
 
     # Parse command line arguments
     return parser.parse_args()
 
 
-def main():
-    clargs = get_cl_args()
+def export_command(args):
+    data.export(args.cluster, args.user, args.start_date,
+                args.end_date)
 
-    if clargs.option == 'export':
-        data.export(clargs.cluster, clargs.user, clargs.start_date,
-                    clargs.end_date)
-    elif clargs.option == 'usage':
-        df = data.import_csv(clargs.files)
-        df = data.filter_dates(df, clargs.start_date, clargs.end_date)
-        usage.usage(df, clargs.accounts, clargs.users, clargs.output)
+
+def usage_command(args):
+    df = data.import_csv(args.files)
+    df = data.filter_dates(df, args.start_date, args.end_date)
+    usage.usage(df, args.accounts, args.users, args.output)
+
+
+def main():
+    args = get_cl_args()
+
+    args.func(args)
 
 
 if __name__ == "__main__":
