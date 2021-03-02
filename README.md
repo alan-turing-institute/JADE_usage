@@ -1,7 +1,8 @@
 # JADE_usage
+
 [![CI](https://github.com/alan-turing-institute/JADE_usage/actions/workflows/ci.yaml/badge.svg)](https://github.com/alan-turing-institute/JADE_usage/actions/workflows/ci.yaml)
 
-A command line utility for exporting and analysing usage on [JADE](jade.ac.uk).
+A command line utility for exporting and analysing usage on [JADE](http://jade.ac.uk).
 
 ## Installation
 
