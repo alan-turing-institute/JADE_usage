@@ -31,16 +31,6 @@ def _elapsed(string):
                             seconds=int(seconds))
 
 
-def _fetch_filter(df):
-    """
-    Filter the fetched DataFrame for unwanted and unnecessary records
-    """
-    # Remove jobs with no GPUs
-    df = df[df.AllocGRES.notna()]
-
-    return df
-
-
 def fetch(cluster, user, start, end):
     """
     Fetch usage data from JADE using the 'sacct' command over SSH.
@@ -114,7 +104,9 @@ def fetch(cluster, user, start, end):
         parse_dates=date_columns,
         infer_datetime_format=True,
         )
-    df = _fetch_filter(df)
+
+    # Remove jobs with no GPUs allocated
+    df = df[df.AllocGRES.notna()]
 
     return df
 
