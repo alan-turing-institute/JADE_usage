@@ -62,7 +62,7 @@ def _get_usage_by(df, column):
     return usage
 
 
-def usage(df, accounts=None, users=None, export=None):
+def usage(df, accounts=None, users=None):
     """
     Determine usage from the data in a DataFrame
 
@@ -74,9 +74,6 @@ def usage(df, accounts=None, users=None, export=None):
             Default=None.
         users (:obj:`list` of :obj:`str`, optional): A list of users to
             include in the usage report. If None, all accounts are included.
-            Default=None.
-        export (str): Filename prefix to store usage data per user, group and
-            account to in csv format.
             Default=None.
     """
 
@@ -118,9 +115,3 @@ def usage(df, accounts=None, users=None, export=None):
     # Write totals to stdour
     print("Total selected GPU hours: {:<,.2f}".format(gpu_hours))
     print("Total JADE GPU hours: {:<,.2f}".format(gpu_hours_total))
-
-    # If seleced, write data to a file
-    if export:
-        user_df.to_csv(export+"_user.csv", index=False)
-        group_df.to_csv(export+"_group.csv", index=False)
-        account_df.to_csv(export+"_account.csv", index=False)

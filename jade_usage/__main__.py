@@ -83,12 +83,6 @@ def get_cl_args():
         default=None,
         help="User names to filter usage by"
         )
-    usage_parser.add_argument(
-        "--output",
-        type=str,
-        default=None,
-        help="Filename prefix to write usage to"
-        )
     usage_parser.set_defaults(func=usage_command)
 
     # Parse command line arguments
@@ -103,7 +97,7 @@ def export_command(args):
 def usage_command(args):
     df = data.import_csv(args.files)
     df = data.filter_dates(df, args.start_date, args.end_date)
-    usage.usage(df, args.accounts, args.users, args.output)
+    usage.usage(df, args.accounts, args.users)
 
 
 def main():
