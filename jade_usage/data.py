@@ -6,7 +6,10 @@ from subprocess import run
 FORMAT = ("jobid,jobname,account,user,partition,nodelist,reqgres,allocgres,"
           "state,exitcode,elapsed,submit,start,end")
 DELIMITER = "|"
-JADE_ADDRESS = "jade.hartree.stfc.ac.uk"
+JADE_ADDRESS = {
+    "jade": "jade.hartree.stfc.ac.uk",
+    "jade2": "jade2.hartree.stfc.ac.uk"
+}
 
 
 def _elapsed(string):
@@ -30,7 +33,7 @@ def _elapsed(string):
 
 def _fetch_filter(df):
     """
-    Filter the fetched DataFrame for unwanted and uneeded records
+    Filter the fetched DataFrame for unwanted and unnecessary records
     """
     # Rmove jobs with no GPUs
     df = df[df.AllocGRES.notna()]
@@ -38,11 +41,12 @@ def _fetch_filter(df):
     return df
 
 
-def fetch(user, start_date, end_date):
+def fetch(cluster, user, start_date, end_date):
     """
     Fetch usage data from JADE using the 'sacct' command over SSH.
 
     Args:
+        cluster (str): The cluster to fetch data from. One of 'jade' or 'jade2'
         user (str): The username to attempt to login as.
         start_date (str): The earliest date to get usage for in the format
             YYYY-MM-DD.
@@ -58,7 +62,7 @@ def fetch(user, start_date, end_date):
 
     # Get job data
     result = run(["ssh",
-                  "{user}@{jade}".format(user=user, jade=JADE_ADDRESS),
+                  f"{user}@{JADE_ADDRESS[cluster]}",
                   "sacct",
                   # Get job data for all users
                   "--allusers",
@@ -69,13 +73,13 @@ def fetch(user, start_date, end_date):
                   # prevents double counting elapsed time for batch or
                   # multi-stage jobs)
                   "--allocations",
-                  "--delimiter='{}'".format(DELIMITER),
+                  f"--delimiter='{DELIMITER}'",
                   # When used with starttime and endtime, only jobs that were
                   # in the RUNNING state between these times. That is, only
                   # jobs which had acrued GPU usage between these times.
                   "--state=RUNNING",
-                  "--starttime={}".format(start_date),
-                  "--endtime={}".format(end_date),
+                  f"--starttime={start_date}",
+                  f"--endtime={end_date}",
                   # Ensure that if the job started before starttime, and/or
                   # ended after endtime that the Start and End fields are
                   # truncated to show starttime and endtime respectively
@@ -84,7 +88,7 @@ def fetch(user, start_date, end_date):
                   # is displayed and prevents double counting usage when a job
                   # runs over the start and end time boundaries.
                   "--truncate",
-                  "--format={}".format(FORMAT)
+                  f"--format={FORMAT}"
                   ], capture_output=True, text=True)
 
     if result.returncode != 0:
@@ -124,14 +128,14 @@ class FetchError(Exception):
     def __init__(self, result):
         message = (
             "Non zero return code when attempting to execute sacct over ssh\n"
-            "command: {}\n".format(" ".join(result.args))
-            + "return code: {}\n".format(result.returncode)
-            + "stderr: {}\n".format(result.stderr)
+            f"command: {' '.join(result.args)}\n"
+            f"return code: {result.returncode}\n"
+            f"stderr: {result.stderr}\n"
         )
         super().__init__(message)
 
 
-def export(user, start_date, end_date):
+def export(cluster, user, start_date, end_date):
     """
     Export usage data from JADE to a 'csv' file (although the delimiter is
     '|'). The data is written to a file named {start_date}-{end_date}_usage.csv
@@ -145,9 +149,9 @@ def export(user, start_date, end_date):
         end_date (str): The latest date to get usage for in the format
             YYYY-MM-DD.
     """
-    filename = "{}-{}_usage.csv".format(start_date, end_date)
+    filename = f"{start_date}-{end_date}_usage.csv"
 
-    df = fetch(user, start_date, end_date)
+    df = fetch(cluster, user, start_date, end_date)
     df.to_csv(filename, sep=DELIMITER, index=False)
 
 
