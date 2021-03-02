@@ -1,6 +1,7 @@
 from . import data
 from . import usage
 import argparse
+from datetime import date
 
 
 def get_cl_args():
@@ -8,6 +9,22 @@ def get_cl_args():
     parser = argparse.ArgumentParser(
         description="Fetch and process usage data from JADE"
         )
+
+    # Create parent parser for date range
+    parent_dates = argparse.ArgumentParser(add_help=False)
+    parent_dates.add_argument(
+        "start_date",
+        type=date.fromisoformat,
+        help=("The earliest date (inclusive) to export data for in iso format"
+              " (YYYY-MM-DD)")
+    )
+    parent_dates.add_argument(
+        "end_date",
+        type=date.fromisoformat,
+        help=("The latest date (exclusive) to export data for in iso format"
+              " (YYYY-MM-DD)")
+    )
+
     # Add subparsers, sending the chose subparser to 'option'
     subparsers = parser.add_subparsers(
         description=(
@@ -20,6 +37,7 @@ def get_cl_args():
     # Export parser
     export_parser = subparsers.add_parser(
         "export",
+        parents=[parent_dates],
         help="Export job data",
         description="Export all job data in a period to a csv file"
         )
@@ -34,35 +52,16 @@ def get_cl_args():
         type=str,
         help="JADE username to attempt to login as"
         )
-    export_parser.add_argument(
-        "start_date",
-        type=str,
-        help="The earliest date to export data for in the format YYYY-MM-DD"
-        )
-    export_parser.add_argument(
-        "end_date",
-        type=str,
-        help="The latest date to export data for in the format YYYY-MM-DD"
-        )
 
     # Usage parser
     usage_parser = subparsers.add_parser(
         "usage",
+        parents=[parent_dates],
         help="Display and export usage",
         description=(
             "Display and export GPU hour usage per user, optionally filtered"
             "by a list of usernames or accounts"
             )
-        )
-    usage_parser.add_argument(
-        "start_date",
-        type=str,
-        help="The earliest date to export usage for in the format YYYY-MM-DD"
-        )
-    usage_parser.add_argument(
-        "end_date",
-        type=str,
-        help="The latest date to export usage for in the format YYYY-MM-DD"
         )
     usage_parser.add_argument(
         "--cluster",
