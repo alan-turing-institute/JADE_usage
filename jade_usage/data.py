@@ -31,27 +31,15 @@ def _elapsed(string):
                             seconds=int(seconds))
 
 
-def _fetch_filter(df):
-    """
-    Filter the fetched DataFrame for unwanted and unnecessary records
-    """
-    # Rmove jobs with no GPUs
-    df = df[df.AllocGRES.notna()]
-
-    return df
-
-
-def fetch(cluster, user, start_date, end_date):
+def fetch(cluster, user, start, end):
     """
     Fetch usage data from JADE using the 'sacct' command over SSH.
 
     Args:
         cluster (str): The cluster to fetch data from. One of 'jade' or 'jade2'
         user (str): The username to attempt to login as.
-        start_date (str): The earliest date to get usage for in the format
-            YYYY-MM-DD.
-        end_date (str): The latest date to get usage for in the format
-            YYYY-MM-DD.
+        start (:obj:`datetime.date`): The earliest date to get usage for.
+        end (:obj:`datetime.date`): The latest date to get usage for.
 
     Returns:
         (:obj:`DataFrame`): The output of sacct as a pandas Dataframe.
@@ -78,8 +66,8 @@ def fetch(cluster, user, start_date, end_date):
                   # in the RUNNING state between these times. That is, only
                   # jobs which had acrued GPU usage between these times.
                   "--state=RUNNING",
-                  f"--starttime={start_date}",
-                  f"--endtime={end_date}",
+                  f"--starttime={start}",
+                  f"--endtime={end}",
                   # Ensure that if the job started before starttime, and/or
                   # ended after endtime that the Start and End fields are
                   # truncated to show starttime and endtime respectively
@@ -116,7 +104,9 @@ def fetch(cluster, user, start_date, end_date):
         parse_dates=date_columns,
         infer_datetime_format=True,
         )
-    df = _fetch_filter(df)
+
+    # Remove jobs with no GPUs allocated
+    df = df[df.AllocGRES.notna()]
 
     return df
 
@@ -135,24 +125,23 @@ class FetchError(Exception):
         super().__init__(message)
 
 
-def export(cluster, user, start_date, end_date):
+def export(cluster, user, start, end, output_dir):
     """
     Export usage data from JADE to a 'csv' file (although the delimiter is
-    '|'). The data is written to a file named {start_date}-{end_date}_usage.csv
+    '|'). The data is written to a file named {start}-{end}_usage.csv
 
     This function uses fetch.
 
     Args:
+        cluster (str): The cluster to fetch data from. One of 'jade' or 'jade2'
         user (str): The username to attempt to login as.
-        start_date (str): The earliest date to get usage for in the format
-            YYYY-MM-DD.
-        end_date (str): The latest date to get usage for in the format
-            YYYY-MM-DD.
+        start (:obj:`datetime.date`): The earliest date to get usage for.
+        end (:obj:`datetime.date`): The latest date to get usage for.
     """
-    filename = f"{start_date}-{end_date}_usage.csv"
+    filename = f"{start}-{end}_usage.csv"
 
-    df = fetch(cluster, user, start_date, end_date)
-    df.to_csv(filename, sep=DELIMITER, index=False)
+    df = fetch(cluster, user, start, end)
+    df.to_csv(output_dir/filename, sep=DELIMITER, index=False)
 
 
 def _get_dataframe(infile):
@@ -197,11 +186,11 @@ def import_csv(infile):
         return _get_dataframe(infile)
 
 
-def filter_dates(df, start_date, end_date):
-    start_date = datetime.strptime(start_date, "%Y-%m-%d")
-    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+def filter_dates(df, start, end):
+    start = datetime.combine(start, datetime.min.time())
+    end = datetime.combine(end, datetime.min.time())
 
-    df = df[df.Start >= start_date]
-    df = df[df.End <= end_date]
+    df = df[df.Start >= start]
+    df = df[df.End <= end]
 
     return df
