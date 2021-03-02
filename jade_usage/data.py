@@ -133,7 +133,7 @@ class FetchError(Exception):
         super().__init__(message)
 
 
-def export(cluster, user, start, end):
+def export(cluster, user, start, end, output_dir):
     """
     Export usage data from JADE to a 'csv' file (although the delimiter is
     '|'). The data is written to a file named {start}-{end}_usage.csv
@@ -149,7 +149,7 @@ def export(cluster, user, start, end):
     filename = f"{start}-{end}_usage.csv"
 
     df = fetch(cluster, user, start, end)
-    df.to_csv(filename, sep=DELIMITER, index=False)
+    df.to_csv(output_dir/filename, sep=DELIMITER, index=False)
 
 
 def _get_dataframe(infile):

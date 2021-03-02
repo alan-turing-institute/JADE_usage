@@ -2,6 +2,7 @@ from . import data
 from . import usage
 import argparse
 from datetime import date
+from pathlib import Path
 
 
 def get_cl_args():
@@ -51,6 +52,12 @@ def get_cl_args():
         type=str,
         help="JADE username to attempt to login as"
         )
+    export_parser.add_argument(
+        "-o", "--output-dir",
+        type=Path,
+        help="Directory to write usage data files to, (default: ./)",
+        default="./"
+    )
     export_parser.set_defaults(func=export_command)
 
     # Usage parser
@@ -90,7 +97,7 @@ def get_cl_args():
 
 
 def export_command(args):
-    data.export(args.cluster, args.user, args.start, args.end)
+    data.export(args.cluster, args.user, args.start, args.end, args.output_dir)
 
 
 def usage_command(args):
