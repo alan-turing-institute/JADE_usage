@@ -35,7 +35,7 @@ def _fetch_filter(df):
     """
     Filter the fetched DataFrame for unwanted and unnecessary records
     """
-    # Rmove jobs with no GPUs
+    # Remove jobs with no GPUs
     df = df[df.AllocGRES.notna()]
 
     return df
@@ -48,10 +48,8 @@ def fetch(cluster, user, start_date, end_date):
     Args:
         cluster (str): The cluster to fetch data from. One of 'jade' or 'jade2'
         user (str): The username to attempt to login as.
-        start_date (str): The earliest date to get usage for in the format
-            YYYY-MM-DD.
-        end_date (str): The latest date to get usage for in the format
-            YYYY-MM-DD.
+        start_date (:obj:`datetime.date`): The earliest date to get usage for.
+        end_date (:obj:`datetime.date`): The latest date to get usage for.
 
     Returns:
         (:obj:`DataFrame`): The output of sacct as a pandas Dataframe.
@@ -143,11 +141,10 @@ def export(cluster, user, start_date, end_date):
     This function uses fetch.
 
     Args:
+        cluster (str): The cluster to fetch data from. One of 'jade' or 'jade2'
         user (str): The username to attempt to login as.
-        start_date (str): The earliest date to get usage for in the format
-            YYYY-MM-DD.
-        end_date (str): The latest date to get usage for in the format
-            YYYY-MM-DD.
+        start_date (:obj:`datetime.date`): The earliest date to get usage for.
+        end_date (:obj:`datetime.date`): The latest date to get usage for.
     """
     filename = f"{start_date}-{end_date}_usage.csv"
 
@@ -198,10 +195,10 @@ def import_csv(infile):
 
 
 def filter_dates(df, start_date, end_date):
-    start_date = datetime.strptime(start_date, "%Y-%m-%d")
-    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+    start = datetime.combine(start_date, datetime.min.time())
+    end = datetime.combine(end_date, datetime.min.time())
 
-    df = df[df.Start >= start_date]
-    df = df[df.End <= end_date]
+    df = df[df.Start >= start]
+    df = df[df.End <= end]
 
     return df

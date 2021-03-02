@@ -58,31 +58,16 @@ def get_cl_args():
         "usage",
         parents=[parent_dates],
         help="Display and export usage",
-        description=(
-            "Display and export GPU hour usage per user, optionally filtered"
-            "by a list of usernames or accounts"
-            )
+        description=("Display and export GPU hour usage per user, optionally"
+                     " filtered by a list of usernames or accounts")
         )
     usage_parser.add_argument(
-        "--cluster",
-        type=str,
-        choices=["jade", "jade2"],
-        help="Cluster to export data from. One of 'jade' or 'jade2'"
-    )
-    usage_parser.add_argument(
-        "--user",
-        type=str,
-        default=None,
-        help=("JADE username to attempt to login as, if used usage data is"
-              "fetched from JADE. Incompatible with --file")
-        )
-    usage_parser.add_argument(
-        "--file",
+        "files",
         type=str,
         nargs='*',
         default=None,
         help=("A file, or list of files, containing usage data in the format"
-              "created by the export command. Incompatible with --user")
+              " created by the export command")
         )
     usage_parser.add_argument(
         "--accounts",
@@ -116,17 +101,8 @@ def main():
         data.export(clargs.cluster, clargs.user, clargs.start_date,
                     clargs.end_date)
     elif clargs.option == 'usage':
-        if (clargs.user is not None) and (clargs.file is not None):
-            raise Exception("Only one of --user and --file should be defined")
-
-        if clargs.user:
-            df = data.fetch(clargs.cluster, clargs.user, clargs.start_date,
-                            clargs.end_date)
-        elif clargs.file:
-            df = data.import_csv(clargs.file)
-            df = data.filter_dates(df, clargs.start_date, clargs.end_date)
-        else:
-            raise Exception("One of --user and --file should be defined")
+        df = data.import_csv(clargs.files)
+        df = data.filter_dates(df, clargs.start_date, clargs.end_date)
         usage.usage(df, clargs.accounts, clargs.users, clargs.output)
 
 
