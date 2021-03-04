@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "jade_usage"
+version = "0.1.0"
+description = "Export and inspect usage of the JADE and JADE2 clusters"
+authors = ["Jim Madge <jmadge@turing.ac.uk>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.7.1"
+pandas = "^1.2.3"
+tabulate = "^0.8.9"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^3.8.4"
+pytest = "^6.2.2"
+pytest-cov = "^2.11.1"
+mypy = "^0.812"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
