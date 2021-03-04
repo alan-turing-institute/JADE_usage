@@ -1,6 +1,6 @@
 from datetime import datetime
 from io import StringIO
-import pandas as pd
+import pandas as pd  # type: ignore
 from subprocess import run
 
 FORMAT = ("jobid,jobname,account,user,partition,nodelist,reqgres,allocgres,"
