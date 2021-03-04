@@ -6,7 +6,7 @@ authors = ["Jim Madge <jmadge@turing.ac.uk>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.7.1"
 pandas = "^1.2.3"
 tabulate = "^0.8.9"
 
