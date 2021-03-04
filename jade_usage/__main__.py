@@ -70,7 +70,7 @@ def get_cl_args() -> argparse.Namespace:
         )
     usage_parser.add_argument(
         "files",
-        type=str,
+        type=Path,
         nargs='*',
         default=None,
         help=("A file, or list of files, containing usage data in the format"
