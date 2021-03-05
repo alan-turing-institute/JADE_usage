@@ -27,19 +27,6 @@ def _get_group(username: str) -> str:
     return username.split("-")[-1]
 
 
-def _get_groups(users: list[str], df: pd.DataFrame) -> tuple[list[str],
-                                                             pd.DataFrame]:
-    """
-    Get a unique list of groups from usernames and tag records with their
-    group
-    """
-    groups = [_get_group(elem) for elem in users]
-    groups = list(set(groups))
-
-    df = df.assign(Group=df.User.apply(_get_group))
-    return groups, df
-
-
 def _get_usage_by(df: pd.DataFrame, column: str) -> pd.DataFrame:
     """
     Product a Dataframe of GPU usage per each unique value in a column. For
@@ -98,8 +85,10 @@ def usage(df: pd.DataFrame, accounts: Optional[Union[str, list[str]]] = None,
     # Get GPU hours for ALL of JADE
     gpu_hours_total = _gpu_hours(usage_total)
 
+    # Add group column to usage data
+    usage = usage.assign(Group=df.User.apply(_get_group))
+
     # Get GPU hours per user, group and account
-    groups, usage = _get_groups(users, usage)
     user_df = _get_usage_by(usage, "User")
     group_df = _get_usage_by(usage, "Group")
     account_df = _get_usage_by(usage, "Account")
