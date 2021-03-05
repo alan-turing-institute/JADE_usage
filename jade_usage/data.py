@@ -23,15 +23,16 @@ def _elapsed(sacct_elapsed: str) -> pd.Timedelta:
     # Elapsed times are in the format [days-]HH:MM:SS[.microseconds]
     # split days from HH:MM:SS
     s = sacct_elapsed.split("-")
+
     if len(s) == 2:
-        days, remainder = s
-        hours, minutes, seconds = remainder.split(":")
-        return pd.Timedelta(days=int(days), hours=int(hours),
-                            minutes=int(minutes), seconds=int(seconds))
+        days, remainder = int(s[0]), s[1]
+        hours, minutes, seconds = (int(elem) for elem in remainder.split(":"))
     elif len(s) == 1:
-        hours, minutes, seconds = s[0].split(":")
-        return pd.Timedelta(hours=int(hours), minutes=int(minutes),
-                            seconds=int(seconds))
+        days = 0
+        hours, minutes, seconds = (int(elem) for elem in s[0].split(":"))
+
+    return pd.Timedelta(days=days, hours=hours, minutes=minutes,
+                        seconds=seconds)
 
 
 def fetch(cluster: str, user: str, start: date, end: date) -> pd.DataFrame:
