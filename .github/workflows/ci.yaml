@@ -18,9 +18,11 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install test dependencies
         run: |
-          pip install flake8 pytest pytest-cov
+          pip install flake8 mypy pytest pytest-cov
       - name: Lint
         run: flake8 --count --show-source --statistics
+      - name: Check static typing
+        run: mypy --strict --pretty ./jade_usage
       - name: Build
         run: pip install .
       - name: Test

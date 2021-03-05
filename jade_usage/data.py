@@ -1,7 +1,10 @@
-from datetime import datetime
+from __future__ import annotations
+from datetime import date, datetime
 from io import StringIO
-import pandas as pd
-from subprocess import run
+import pandas as pd  # type: ignore
+from pathlib import Path
+from subprocess import run, CompletedProcess
+from typing import Any, Union
 
 FORMAT = ("jobid,jobname,account,user,partition,nodelist,reqgres,allocgres,"
           "state,exitcode,elapsed,submit,start,end")
@@ -12,14 +15,14 @@ JADE_ADDRESS = {
 }
 
 
-def _elapsed(string):
+def _elapsed(sacct_elapsed: str) -> pd.Timedelta:
     """
     Convert an elapsed time string as output by sacct to a pandas Timedelta
     object.
     """
     # Elapsed times are in the format [days-]HH:MM:SS[.microseconds]
     # split days from HH:MM:SS
-    s = string.split("-")
+    s = sacct_elapsed.split("-")
     if len(s) == 2:
         days, remainder = s
         hours, minutes, seconds = remainder.split(":")
@@ -31,18 +34,18 @@ def _elapsed(string):
                             seconds=int(seconds))
 
 
-def fetch(cluster, user, start, end):
+def fetch(cluster: str, user: str, start: date, end: date) -> pd.DataFrame:
     """
     Fetch usage data from JADE using the 'sacct' command over SSH.
 
     Args:
-        cluster (str): The cluster to fetch data from. One of 'jade' or 'jade2'
-        user (str): The username to attempt to login as.
-        start (:obj:`datetime.date`): The earliest date to get usage for.
-        end (:obj:`datetime.date`): The latest date to get usage for.
+        cluster: The cluster to fetch data from. One of 'jade' or 'jade2'
+        user: The username to attempt to login as.
+        start: The earliest date to get usage for.
+        end: The latest date to get usage for.
 
     Returns:
-        (:obj:`DataFrame`): The output of sacct as a pandas Dataframe.
+        The output of sacct as a pandas Dataframe.
 
     Raises:
         FetchError: If the ssh or sacct command return an error.
@@ -66,8 +69,8 @@ def fetch(cluster, user, start, end):
                   # in the RUNNING state between these times. That is, only
                   # jobs which had acrued GPU usage between these times.
                   "--state=RUNNING",
-                  f"--starttime={start}",
-                  f"--endtime={end}",
+                  f"--starttime={start.isoformat()}",
+                  f"--endtime={end.isoformat()}",
                   # Ensure that if the job started before starttime, and/or
                   # ended after endtime that the Start and End fields are
                   # truncated to show starttime and endtime respectively
@@ -115,7 +118,7 @@ class FetchError(Exception):
     """
     Exception raised when fetch fails
     """
-    def __init__(self, result):
+    def __init__(self, result: CompletedProcess[Any]) -> None:
         message = (
             "Non zero return code when attempting to execute sacct over ssh\n"
             f"command: {' '.join(result.args)}\n"
@@ -125,7 +128,8 @@ class FetchError(Exception):
         super().__init__(message)
 
 
-def export(cluster, user, start, end, output_dir):
+def export(cluster: str, user: str, start: date, end: date,
+           output_dir: Path) -> None:
     """
     Export usage data from JADE to a 'csv' file (although the delimiter is
     '|'). The data is written to a file named {start}-{end}_usage.csv
@@ -144,7 +148,7 @@ def export(cluster, user, start, end, output_dir):
     df.to_csv(output_dir/filename, sep=DELIMITER, index=False)
 
 
-def _get_dataframe(infile):
+def _get_dataframe(infile: Path) -> pd.DataFrame:
     """
     Create a DataFrame from a single csv.
     """
@@ -168,7 +172,7 @@ def _get_dataframe(infile):
     return df
 
 
-def import_csv(infile):
+def import_csv(infile: Union[Path, list[Path]]) -> pd.DataFrame:
     """
     Get a usage DataFrame from a csv, or set of csvs in the format produced by
     the export command.
@@ -180,13 +184,13 @@ def import_csv(infile):
     Returns:
         (:obj:`DataFrame`): The output of sacct as a pandas Dataframe.
     """
-    if type(infile) == list:
-        return pd.concat([_get_dataframe(f) for f in infile])
-    elif type(infile) == str:
-        return _get_dataframe(infile)
+    if not isinstance(infile, list):
+        infile = [infile]
+
+    return pd.concat([_get_dataframe(f) for f in infile])
 
 
-def filter_dates(df, start, end):
+def filter_dates(df: pd.DataFrame, start: date, end: date) -> pd.DataFrame:
     start = datetime.combine(start, datetime.min.time())
     end = datetime.combine(end, datetime.min.time())
 

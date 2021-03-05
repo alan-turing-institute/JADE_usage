@@ -5,7 +5,7 @@ from datetime import date
 from pathlib import Path
 
 
-def get_cl_args():
+def get_cl_args() -> argparse.Namespace:
     # Create argument parser
     parser = argparse.ArgumentParser(
         description="Fetch and process usage data from JADE"
@@ -70,7 +70,7 @@ def get_cl_args():
         )
     usage_parser.add_argument(
         "files",
-        type=str,
+        type=Path,
         nargs='*',
         default=None,
         help=("A file, or list of files, containing usage data in the format"
@@ -96,17 +96,17 @@ def get_cl_args():
     return parser.parse_args()
 
 
-def export_command(args):
+def export_command(args: argparse.Namespace) -> None:
     data.export(args.cluster, args.user, args.start, args.end, args.output_dir)
 
 
-def usage_command(args):
+def usage_command(args: argparse.Namespace) -> None:
     df = data.import_csv(args.files)
     df = data.filter_dates(df, args.start, args.end)
     usage.usage(df, args.accounts, args.users)
 
 
-def main():
+def main() -> None:
     args = get_cl_args()
 
     args.func(args)

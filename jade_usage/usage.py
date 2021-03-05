@@ -1,8 +1,10 @@
-import pandas as pd
+from __future__ import annotations
+import pandas as pd  # type: ignore
 from tabulate import tabulate
+from typing import Optional, Union
 
 
-def _gpu_hours(df):
+def _gpu_hours(df: pd.DataFrame) -> float:
     seconds_per_hour = 60.**2
 
     # Multiply the number of GPUs allocated (from the AllocGRES column) by the
@@ -14,7 +16,7 @@ def _gpu_hours(df):
     return GPU_hours
 
 
-def _get_group(username):
+def _get_group(username: str) -> str:
     """
     Get the group from a username
 
@@ -25,7 +27,8 @@ def _get_group(username):
     return username.split("-")[-1]
 
 
-def _get_groups(users, df):
+def _get_groups(users: list[str], df: pd.DataFrame) -> tuple[list[str],
+                                                             pd.DataFrame]:
     """
     Get a unique list of groups from usernames and tag records with their
     group
@@ -37,15 +40,7 @@ def _get_groups(users, df):
     return groups, df
 
 
-def _print_human_readable_table(df):
-    """
-    Print a DataFrame in a human readable, markdown format
-    """
-    print(tabulate(df, headers="keys", showindex=False, tablefmt="github"))
-    print("\n")
-
-
-def _get_usage_by(df, column):
+def _get_usage_by(df: pd.DataFrame, column: str) -> pd.DataFrame:
     """
     Product a Dataframe of GPU usage per each unique value in a column. For
     example, usage per user or account.
@@ -56,40 +51,41 @@ def _get_usage_by(df, column):
     for value in unique:
         gpu_hours_user = _gpu_hours(df[df[column] == value])
         usage.append((value, gpu_hours_user))
-    usage = pd.DataFrame(usage, columns=[column, "Usage/GPUh"])
-    usage.sort_values("Usage/GPUh", ascending=False, inplace=True)
+    usage_df = pd.DataFrame(usage, columns=[column, "Usage/GPUh"])
+    usage_df.sort_values("Usage/GPUh", ascending=False, inplace=True)
 
-    return usage
+    return usage_df
 
 
-def usage(df, accounts=None, users=None):
+def usage(df: pd.DataFrame, accounts: Optional[Union[str, list[str]]] = None,
+          users: Optional[Union[str, list[str]]] = None) -> None:
     """
     Determine usage from the data in a DataFrame
 
     Args:
-        df (:obj:DataFrame): A Pandas DataFrame containing usage data, like
-            that produced by fetch.
-        accounts (:obj:`list` of :obj:`str`, optional): A list of accounts to
-            include in the usage report. If None, all accounts are included.
-            Default=None.
-        users (:obj:`list` of :obj:`str`, optional): A list of users to
-            include in the usage report. If None, all accounts are included.
-            Default=None.
+        df: A Pandas DataFrame containing usage data, like that produced by
+            fetch.
+        accounts: A list of accounts to include in the usage report. If None,
+            all accounts are included. Default=None.
+        users: A list of users to include in the usage report. If None, all
+            accounts are included. Default=None.
     """
-
     usage_total = df
     usage = usage_total
     # Filter by accounts
     if accounts:
+        if not isinstance(accounts, list):
+            accounts = [accounts]
+
         usage = usage[usage.Account.isin(accounts)]
-    else:
-        accounts = list(usage.Account.unique())
 
     # Filter by user names
     if users:
+        if not isinstance(users, list):
+            users = [users]
+
         usage = usage[usage.User.isin(users)]
     else:
-        # Get all unique user names if a list was not supplied
         users = list(usage.User.unique())
 
     # Ensure usage DataFrame is not empty before continuing
@@ -110,7 +106,10 @@ def usage(df, accounts=None, users=None):
 
     # Write human readable summary to stdout
     for df in [user_df, group_df, account_df]:
-        _print_human_readable_table(df)
+        print(
+            tabulate(df, headers="keys", showindex=False, tablefmt="github"),
+            end="\n\n"
+        )
 
     # Write totals to stdour
     print("Total selected GPU hours: {:<,.2f}".format(gpu_hours))
