@@ -44,21 +44,22 @@ def _get_usage_by(df: pd.DataFrame, column: str) -> pd.DataFrame:
     return usage_df
 
 
-def usage(df: pd.DataFrame, accounts: Optional[Union[str, list[str]]] = None,
+def usage(usage: pd.DataFrame,
+          accounts: Optional[Union[str, list[str]]] = None,
           users: Optional[Union[str, list[str]]] = None) -> None:
     """
     Determine usage from the data in a DataFrame
 
     Args:
-        df: A Pandas DataFrame containing usage data, like that produced by
+        usage: A Pandas DataFrame containing usage data, like that produced by
             fetch.
         accounts: A list of accounts to include in the usage report. If None,
             all accounts are included. Default=None.
         users: A list of users to include in the usage report. If None, all
             accounts are included. Default=None.
     """
-    usage_total = df
-    usage = usage_total
+    usage_total = usage
+
     # Filter by accounts
     if accounts:
         if not isinstance(accounts, list):
@@ -86,20 +87,19 @@ def usage(df: pd.DataFrame, accounts: Optional[Union[str, list[str]]] = None,
     gpu_hours_total = _gpu_hours(usage_total)
 
     # Add group column to usage data
-    usage = usage.assign(Group=df.User.apply(_get_group))
+    usage = usage.assign(Group=usage.User.apply(_get_group))
 
     # Get GPU hours per user, group and account
     user_df = _get_usage_by(usage, "User")
     group_df = _get_usage_by(usage, "Group")
     account_df = _get_usage_by(usage, "Account")
 
-    # Write human readable summary to stdout
+    # Print human readable summary of usage DataFrames
     for df in [user_df, group_df, account_df]:
         print(
             tabulate(df, headers="keys", showindex=False, tablefmt="github"),
             end="\n\n"
         )
 
-    # Write totals to stdour
     print("Total selected GPU hours: {:<,.2f}".format(gpu_hours))
     print("Total JADE GPU hours: {:<,.2f}".format(gpu_hours_total))
