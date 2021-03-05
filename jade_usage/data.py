@@ -3,7 +3,7 @@ from io import StringIO
 import pandas as pd  # type: ignore
 from pathlib import Path
 from subprocess import run, CompletedProcess
-from typing import Any, List, Union
+from typing import Any, Union
 
 FORMAT = ("jobid,jobname,account,user,partition,nodelist,reqgres,allocgres,"
           "state,exitcode,elapsed,submit,start,end")
@@ -171,7 +171,7 @@ def _get_dataframe(infile: Path) -> pd.DataFrame:
     return df
 
 
-def import_csv(infile: Union[Path, List[Path]]) -> pd.DataFrame:
+def import_csv(infile: Union[Path, list[Path]]) -> pd.DataFrame:
     """
     Get a usage DataFrame from a csv, or set of csvs in the format produced by
     the export command.
