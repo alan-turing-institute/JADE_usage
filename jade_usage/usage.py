@@ -101,5 +101,5 @@ def usage(usage: pd.DataFrame,
             end="\n\n"
         )
 
-    print("Total selected GPU hours: {:<,.2f}".format(gpu_hours))
-    print("Total JADE GPU hours: {:<,.2f}".format(gpu_hours_total))
+    print(f"Total selected GPU hours: {gpu_hours:.2f}")
+    print(f"Total JADE GPU hours: {gpu_hours_total:.2f}")
