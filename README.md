@@ -1,20 +1,18 @@
-# JADE_usage
+# JADE usage
 
 [![CI](https://github.com/alan-turing-institute/JADE_usage/actions/workflows/ci.yaml/badge.svg)](https://github.com/alan-turing-institute/JADE_usage/actions/workflows/ci.yaml)
 
-A command line utility for exporting and analysing usage on [JADE](http://jade.ac.uk).
+A command line utility for exporting and analysing usage on [JADE](http://jade.ac.uk) and JADE2.
 
 ## Installation
 
-To install clone this repository then install using pip. For example
+Install using pip
 
 ```
-$ git clone https://github.com/alan-turing-institute/JADE_usage.git
-$ cd JADE_usage
-$ pip install .
+$ pip install git+https://github.com/alan-turing-institute/JADE_usage.git
 ```
 
-A summary of commands can then be seen by executing
+A summary of commands can then be seen by running
 
 ```
 $ jade-usage -h
