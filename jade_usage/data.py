@@ -138,10 +138,11 @@ def export(cluster: str, user: str, start: date, end: date,
     This function uses fetch.
 
     Args:
-        cluster (str): The cluster to fetch data from. One of 'jade' or 'jade2'
-        user (str): The username to attempt to login as.
-        start (:obj:`datetime.date`): The earliest date to get usage for.
-        end (:obj:`datetime.date`): The latest date to get usage for.
+        cluster: Cluster to fetch data from, one of 'jade' or 'jade2'
+        user: Username to attempt to login as
+        start: Earliest date to get usage for
+        end: Latest date to get usage for
+        output_dir: Directory to store usage data csv in
     """
     filename = f"{start}-{end}_usage.csv"
 
@@ -179,11 +180,7 @@ def import_csv(infile: Union[Path, list[Path]]) -> pd.DataFrame:
     the export command.
 
     Args:
-        infile (str or :obj:`list` of str): The paths of the file or files to
-        import.
-
-    Returns:
-        (:obj:`DataFrame`): The output of sacct as a pandas Dataframe.
+        infile: path or paths of the file or files to import
     """
     if not isinstance(infile, list):
         infile = [infile]
@@ -192,6 +189,7 @@ def import_csv(infile: Union[Path, list[Path]]) -> pd.DataFrame:
 
 
 def filter_dates(df: pd.DataFrame, start: date, end: date) -> pd.DataFrame:
+    """Filter out entries in the DataFrame not between start and end."""
     start = datetime.combine(start, datetime.min.time())
     end = datetime.combine(end, datetime.min.time())
 

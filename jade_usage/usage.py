@@ -29,8 +29,12 @@ def _get_group(username: str) -> str:
 
 def _get_usage_by(df: pd.DataFrame, column: str) -> pd.DataFrame:
     """
-    Product a Dataframe of GPU usage per each unique value in a column. For
+    Produce a Dataframe of GPU usage per each unique value in a column. For
     example, usage per user or account.
+
+    Args:
+        df: DataFrame to filter
+        column: Header of the column
     """
 
     unique = list(df[column].unique())
