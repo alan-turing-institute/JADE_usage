@@ -63,20 +63,25 @@ def usage_command(
         help=("A file, or list of files, containing usage data in the format"
               " created by the export command")
     ),
-    accounts: list[str] = typer.Option(
-        [], help="Accounts to filter usage by"
+    account: list[str] = typer.Option(
+        None,
+        help="Account to filter usage by, can be specified multiple times"
     ),
-    users: list[str] = typer.Option(
-        None, help="User names to filter usage by"
+    user: list[str] = typer.Option(
+        None,
+        help="User name to filter usage by, can be specified multiple times"
     )
 ) -> None:
     # Ensure list arguments are lists. See
     # https://github.com/tiangolo/typer/issues/127
     files = list(files)
-    accounts = list(accounts)
-    users = list(users)
+    accounts = list(account)
+    users = list(user)
+
+    # Convert datetime objects to dates
     start = start.date()
     end = end.date()
+
     df = data.import_csv(files)
     df = data.filter_dates(df, start, end)
     usage.usage(df, accounts, users)

@@ -62,6 +62,7 @@ def usage(usage: pd.DataFrame,
         users: A list of users to include in the usage report. If None, all
             accounts are included. Default=None.
     """
+    print(users)
     usage_total = usage
 
     # Filter by accounts
