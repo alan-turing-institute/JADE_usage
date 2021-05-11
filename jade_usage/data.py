@@ -4,7 +4,7 @@ from io import StringIO
 import pandas as pd  # type: ignore
 from pathlib import Path
 from subprocess import run, CompletedProcess
-from typing import Any, Union
+from typing import Any
 
 FORMAT = ("jobid,jobname,account,user,partition,nodelist,reqgres,allocgres,"
           "state,exitcode,elapsed,submit,start,end")
