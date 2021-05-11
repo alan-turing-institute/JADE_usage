@@ -45,9 +45,7 @@ def export_command(
         help="Directory to write usage data files to, (default: ./)"
     )
 ) -> None:
-    start = start.date()
-    end = end.date()
-    data.export(cluster, user, start, end, output_dir)
+    data.export(cluster.value, user, start.date(), end.date(), output_dir)
 
 
 @app.command(
@@ -72,18 +70,14 @@ def usage_command(
         help="User name to filter usage by, can be specified multiple times"
     )
 ) -> None:
-    # Ensure list arguments are lists. See
+    # Ensure list arguments are lists. Typer actually returns tuples. See
     # https://github.com/tiangolo/typer/issues/127
     files = list(files)
     accounts = list(account)
     users = list(user)
 
-    # Convert datetime objects to dates
-    start = start.date()
-    end = end.date()
-
     df = data.import_csv(files)
-    df = data.filter_dates(df, start, end)
+    df = data.filter_dates(df, start.date(), end.date())
     usage.usage(df, accounts, users)
 
 
