@@ -1,7 +1,6 @@
 from __future__ import annotations
 import pandas as pd  # type: ignore
 from tabulate import tabulate
-from typing import Optional, Union
 
 
 def _gpu_hours(df: pd.DataFrame) -> float:
