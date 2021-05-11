@@ -1,5 +1,6 @@
 from __future__ import annotations
 from datetime import date, datetime
+from enum import Enum
 from io import StringIO
 import pandas as pd  # type: ignore
 from pathlib import Path
@@ -9,9 +10,16 @@ from typing import Any
 FORMAT = ("jobid,jobname,account,user,partition,nodelist,reqgres,allocgres,"
           "state,exitcode,elapsed,submit,start,end")
 DELIMITER = "|"
+
+
+class Cluster(Enum):
+    jade = "jade"
+    jade2 = "jade2"
+
+
 JADE_ADDRESS = {
-    "jade": "jade.hartree.stfc.ac.uk",
-    "jade2": "jade2.hartree.stfc.ac.uk"
+    Cluster.jade: "jade.hartree.stfc.ac.uk",
+    Cluster.jade2: "jade2.hartree.stfc.ac.uk"
 }
 
 
@@ -35,12 +43,12 @@ def _elapsed(sacct_elapsed: str) -> pd.Timedelta:
                         seconds=seconds)
 
 
-def fetch(cluster: str, user: str, start: date, end: date) -> pd.DataFrame:
+def fetch(cluster: Cluster, user: str, start: date, end: date) -> pd.DataFrame:
     """
     Fetch usage data from JADE using the 'sacct' command over SSH.
 
     Args:
-        cluster: The cluster to fetch data from. One of 'jade' or 'jade2'
+        cluster: The cluster to fetch data from.
         user: The username to attempt to login as.
         start: The earliest date to get usage for.
         end: The latest date to get usage for.
@@ -129,7 +137,7 @@ class FetchError(Exception):
         super().__init__(message)
 
 
-def export(cluster: str, user: str, start: date, end: date,
+def export(cluster: Cluster, user: str, start: date, end: date,
            output_dir: Path) -> None:
     """
     Export usage data from JADE to a 'csv' file (although the delimiter is
@@ -138,7 +146,7 @@ def export(cluster: str, user: str, start: date, end: date,
     This function uses fetch.
 
     Args:
-        cluster: Cluster to fetch data from, one of 'jade' or 'jade2'
+        cluster: Cluster to fetch data from
         user: Username to attempt to login as
         start: Earliest date to get usage for
         end: Latest date to get usage for

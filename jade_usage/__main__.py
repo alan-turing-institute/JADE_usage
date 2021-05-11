@@ -1,14 +1,8 @@
 from . import data
 from . import usage
 from datetime import datetime
-from enum import Enum
 from pathlib import Path
 import typer
-
-
-class Cluster(Enum):
-    jade = "jade"
-    jade2 = "jade2"
 
 
 app = typer.Typer()
@@ -33,7 +27,7 @@ def export_command(
     start: datetime = start_argument,
     end: datetime = end_argument,
     user: str = typer.Argument(..., help="Username to attempt to login with"),
-    cluster: Cluster = typer.Argument(
+    cluster: data.Cluster = typer.Argument(
         ..., help="Cluster to export data from. One of 'jade' or 'jade2'"
     ),
     output_dir: Path = typer.Option(
@@ -45,7 +39,7 @@ def export_command(
         help="Directory to write usage data files to, (default: ./)"
     )
 ) -> None:
-    data.export(cluster.value, user, start.date(), end.date(), output_dir)
+    data.export(cluster, user, start.date(), end.date(), output_dir)
 
 
 @app.command(
