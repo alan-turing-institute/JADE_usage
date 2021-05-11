@@ -1,115 +1,89 @@
 from . import data
 from . import usage
-import argparse
-from datetime import date
+from datetime import datetime
+from enum import Enum
 from pathlib import Path
+import typer
 
 
-def get_cl_args() -> argparse.Namespace:
-    # Create argument parser
-    parser = argparse.ArgumentParser(
-        description="Fetch and process usage data from JADE"
-        )
+class Cluster(Enum):
+    jade = "jade"
+    jade2 = "jade2"
 
-    # Create parent parser for date range
-    parent_dates = argparse.ArgumentParser(add_help=False)
-    parent_dates.add_argument(
-        "start",
-        type=date.fromisoformat,
-        help=("The earliest date (inclusive) to export data for in iso format"
-              " (YYYY-MM-DD)")
+
+app = typer.Typer()
+
+start_argument = typer.Argument(
+    ...,
+    formats=["%Y-%m-%d"],
+    help=("The earliest date (inclusive) to export data for in iso format"
+          " (YYYY-MM-DD)")
+)
+
+end_argument = typer.Argument(
+    ...,
+    formats=["%Y-%m-%d"],
+    help=("The latest date (exclusive) to export data for in iso format"
+          " (YYYY-MM-DD)")
+)
+
+
+@app.command("export", help="Export all job data in a period to a csv file")
+def export_command(
+    start: datetime = start_argument,
+    end: datetime = end_argument,
+    user: str = typer.Argument(..., help="Username to attempt to login with"),
+    cluster: Cluster = typer.Argument(
+        ..., help="Cluster to export data from. One of 'jade' or 'jade2'"
+    ),
+    output_dir: Path = typer.Option(
+        "./",
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        writable=True,
+        help="Directory to write usage data files to, (default: ./)"
     )
-    parent_dates.add_argument(
-        "end",
-        type=date.fromisoformat,
-        help=("The latest date (exclusive) to export data for in iso format"
-              " (YYYY-MM-DD)")
-    )
+) -> None:
+    start = start.date()
+    end = end.date()
+    data.export(cluster, user, start, end, output_dir)
 
-    # Add subparsers
-    subparsers = parser.add_subparsers(
-        description=(
-            "run jade-usage <subcommand> -h for help with each subcommand"
-            ),
-        required=True
-        )
 
-    # Export parser
-    export_parser = subparsers.add_parser(
-        "export",
-        parents=[parent_dates],
-        help="Export job data",
-        description="Export all job data in a period to a csv file"
-        )
-    export_parser.add_argument(
-        "cluster",
-        type=str,
-        choices=["jade", "jade2"],
-        help="Cluster to export data from. One of 'jade' or 'jade2'"
-    )
-    export_parser.add_argument(
-        "user",
-        type=str,
-        help="JADE username to attempt to login as"
-        )
-    export_parser.add_argument(
-        "-o", "--output-dir",
-        type=Path,
-        help="Directory to write usage data files to, (default: ./)",
-        default="./"
-    )
-    export_parser.set_defaults(func=export_command)
-
-    # Usage parser
-    usage_parser = subparsers.add_parser(
-        "usage",
-        parents=[parent_dates],
-        help="Display and export usage",
-        description=("Display and export GPU hour usage per user, optionally"
-                     " filtered by a list of usernames or accounts")
-        )
-    usage_parser.add_argument(
-        "files",
-        type=Path,
-        nargs='*',
-        default=None,
+@app.command(
+    "usage",
+    help=("Display and export GPU hour usage per user, optionally filtered by "
+          " a list of usernames or accounts")
+)
+def usage_command(
+    start: datetime = start_argument,
+    end: datetime = end_argument,
+    files: list[Path] = typer.Argument(
+        ...,
         help=("A file, or list of files, containing usage data in the format"
               " created by the export command")
-        )
-    usage_parser.add_argument(
-        "--accounts",
-        type=str,
-        nargs='*',
-        default=None,
-        help="Accounts to filter usage by"
-        )
-    usage_parser.add_argument(
-        "--users",
-        type=str,
-        nargs='*',
-        default=None,
-        help="User names to filter usage by"
-        )
-    usage_parser.set_defaults(func=usage_command)
-
-    # Parse command line arguments
-    return parser.parse_args()
-
-
-def export_command(args: argparse.Namespace) -> None:
-    data.export(args.cluster, args.user, args.start, args.end, args.output_dir)
-
-
-def usage_command(args: argparse.Namespace) -> None:
-    df = data.import_csv(args.files)
-    df = data.filter_dates(df, args.start, args.end)
-    usage.usage(df, args.accounts, args.users)
+    ),
+    accounts: list[str] = typer.Option(
+        [], help="Accounts to filter usage by"
+    ),
+    users: list[str] = typer.Option(
+        None, help="User names to filter usage by"
+    )
+) -> None:
+    # Ensure list arguments are lists. See
+    # https://github.com/tiangolo/typer/issues/127
+    files = list(files)
+    accounts = list(accounts)
+    users = list(users)
+    start = start.date()
+    end = end.date()
+    df = data.import_csv(files)
+    df = data.filter_dates(df, start, end)
+    usage.usage(df, accounts, users)
 
 
 def main() -> None:
-    args = get_cl_args()
-
-    args.func(args)
+    app()
 
 
 if __name__ == "__main__":

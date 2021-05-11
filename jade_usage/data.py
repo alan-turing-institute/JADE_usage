@@ -174,17 +174,14 @@ def _get_dataframe(infile: Path) -> pd.DataFrame:
     return df
 
 
-def import_csv(infile: Union[Path, list[Path]]) -> pd.DataFrame:
+def import_csv(infile: list[Path]) -> pd.DataFrame:
     """
     Get a usage DataFrame from a csv, or set of csvs in the format produced by
     the export command.
 
     Args:
-        infile: path or paths of the file or files to import
+        infile: paths of the files to import
     """
-    if not isinstance(infile, list):
-        infile = [infile]
-
     return pd.concat([_get_dataframe(f) for f in infile])
 
 
