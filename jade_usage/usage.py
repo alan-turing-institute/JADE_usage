@@ -1,7 +1,6 @@
 from __future__ import annotations
 import pandas as pd  # type: ignore
 from tabulate import tabulate
-from typing import Optional, Union
 
 
 def _gpu_hours(df: pd.DataFrame) -> float:
@@ -48,9 +47,8 @@ def _get_usage_by(df: pd.DataFrame, column: str) -> pd.DataFrame:
     return usage_df
 
 
-def usage(usage: pd.DataFrame,
-          accounts: Optional[Union[str, list[str]]] = None,
-          users: Optional[Union[str, list[str]]] = None) -> None:
+def usage(usage: pd.DataFrame, accounts: list[str] = [],
+          users: list[str] = []) -> None:
     """
     Determine usage from the data in a DataFrame
 
@@ -58,24 +56,18 @@ def usage(usage: pd.DataFrame,
         usage: A Pandas DataFrame containing usage data, like that produced by
             fetch.
         accounts: A list of accounts to include in the usage report. If None,
-            all accounts are included. Default=None.
+            all accounts are included.
         users: A list of users to include in the usage report. If None, all
-            accounts are included. Default=None.
+            accounts are included.
     """
     usage_total = usage
 
     # Filter by accounts
     if accounts:
-        if not isinstance(accounts, list):
-            accounts = [accounts]
-
         usage = usage[usage.Account.isin(accounts)]
 
     # Filter by user names
     if users:
-        if not isinstance(users, list):
-            users = [users]
-
         usage = usage[usage.User.isin(users)]
     else:
         users = list(usage.User.unique())
