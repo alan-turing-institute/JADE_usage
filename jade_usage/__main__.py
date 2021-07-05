@@ -55,6 +55,9 @@ def usage_command(
         help=("A file, or list of files, containing usage data in the format"
               " created by the export command")
     ),
+    cluster: data.Cluster = typer.Argument(
+        ..., help="Cluster to export data from. One of 'jade' or 'jade2'"
+    ),
     account: list[str] = typer.Option(
         None,
         help="Account to filter usage by, can be specified multiple times"
@@ -72,7 +75,10 @@ def usage_command(
 
     df = data.import_csv(files)
     df = data.filter_dates(df, start.date(), end.date())
-    usage.usage(df, accounts, users)
+
+    elapsed_days = (end.date() - start.date()).days
+
+    usage.usage(df, accounts, users, elapsed_days, cluster)
 
 
 def main() -> None:

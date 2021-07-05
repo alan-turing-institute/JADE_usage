@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "jade_usage"
-version = "0.2.1"
+version = "0.3.0"
 description = "Export and inspect usage of the JADE and JADE2 clusters"
 authors = ["Jim Madge <jmadge@turing.ac.uk>"]
 license = "MIT"

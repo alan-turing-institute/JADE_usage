@@ -1,6 +1,13 @@
 from __future__ import annotations
 import pandas as pd  # type: ignore
 from tabulate import tabulate
+from .data import Cluster
+
+
+JADE_DAILY_CAPACITY = {
+    Cluster.jade: 4224,
+    Cluster.jade2: 10584
+}
 
 
 def _gpu_hours(df: pd.DataFrame) -> float:
@@ -47,8 +54,8 @@ def _get_usage_by(df: pd.DataFrame, column: str) -> pd.DataFrame:
     return usage_df
 
 
-def usage(usage: pd.DataFrame, accounts: list[str] = [],
-          users: list[str] = []) -> None:
+def usage(usage: pd.DataFrame, accounts: list[str],
+          users: list[str], elapsed_days: int, cluster: Cluster) -> None:
     """
     Determine usage from the data in a DataFrame
 
@@ -59,6 +66,7 @@ def usage(usage: pd.DataFrame, accounts: list[str] = [],
             all accounts are included.
         users: A list of users to include in the usage report. If None, all
             accounts are included.
+        elapsed_days: The number of days covered in the dataframe.
     """
     usage_total = usage
 
@@ -97,5 +105,15 @@ def usage(usage: pd.DataFrame, accounts: list[str] = [],
             end="\n\n"
         )
 
+    selected_utilisation = (
+        gpu_hours / elapsed_days / JADE_DAILY_CAPACITY[cluster]
+    )
+
+    total_utilisation = (
+        gpu_hours_total / elapsed_days / JADE_DAILY_CAPACITY[cluster]
+    )
+
     print(f"Total selected GPU hours: {gpu_hours:.2f}")
+    print(f"Total selected utilisation: {selected_utilisation*100:.2f}%")
     print(f"Total JADE GPU hours: {gpu_hours_total:.2f}")
+    print(f"Total JADE utilisation: {total_utilisation*100:.2f}%")
