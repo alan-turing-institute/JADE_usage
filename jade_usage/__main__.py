@@ -44,8 +44,8 @@ def export_command(
 
 @app.command(
     "usage",
-    help=("Display and export GPU hour usage per user, optionally filtered by "
-          " a list of usernames or accounts")
+    help=("Display GPU hour usage per user, optionally filtered by a list"
+          " of usernames or accounts")
 )
 def usage_command(
     start: datetime = start_argument,
