@@ -6,7 +6,7 @@ from .data import Cluster
 
 JADE_DAILY_CAPACITY = {
     Cluster.jade: 4224,
-    Cluster.jade2: 10584
+    Cluster.jade2: 12096
 }
 
 
