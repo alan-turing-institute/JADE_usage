@@ -62,26 +62,31 @@ def usage_command(
         None,
         help="Comma separated list of accounts to filter usage by"
     ),
-    user: list[str] = typer.Option(
+    users: str = typer.Option(
         None,
-        help="User name to filter usage by, can be specified multiple times"
+        help="Comma separated list of user names to filter usage by"
     )
 ) -> None:
     # Ensure list arguments are lists. Typer actually returns tuples. See
     # https://github.com/tiangolo/typer/issues/127
     files = list(files)
+
     if accounts is None:
-        accounts_list = []
+        account_list = []
     else:
-        accounts_list = accounts.split(",")
-    users = list(user)
+        account_list = accounts.split(",")
+
+    if users is None:
+        user_list = []
+    else:
+        user_list = users.split(",")
 
     df = data.import_csv(files)
     df = data.filter_dates(df, start.date(), end.date())
 
     elapsed_days = (end.date() - start.date()).days
 
-    usage.usage(df, accounts_list, users, elapsed_days, cluster)
+    usage.usage(df, account_list, user_list, elapsed_days, cluster)
 
 
 def main() -> None:
