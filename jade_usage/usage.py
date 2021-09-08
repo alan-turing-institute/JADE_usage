@@ -1,6 +1,7 @@
 from __future__ import annotations
 import pandas as pd  # type: ignore
 from tabulate import tabulate
+from typing import Optional
 from .data import Cluster
 
 
@@ -54,8 +55,9 @@ def _get_usage_by(df: pd.DataFrame, column: str) -> pd.DataFrame:
     return usage_df
 
 
-def usage(usage: pd.DataFrame, accounts: list[str],
-          users: list[str], elapsed_days: int, cluster: Cluster) -> None:
+def usage(usage: pd.DataFrame, accounts: Optional[list[str]],
+          users: Optional[list[str]], elapsed_days: int, cluster: Cluster,
+          quota: Optional[int] = None) -> None:
     """
     Determine usage from the data in a DataFrame
 
@@ -117,3 +119,8 @@ def usage(usage: pd.DataFrame, accounts: list[str],
     print(f"Total selected utilisation: {selected_utilisation*100:.2f}%")
     print(f"Total JADE GPU hours: {gpu_hours_total:.2f}")
     print(f"Total JADE utilisation: {total_utilisation*100:.2f}%")
+    if quota:
+        quota_utilisation = (
+            gpu_hours / elapsed_days / quota
+        )
+        print(f"Quota utilisation: {quota_utilisation*100:.2f}%")

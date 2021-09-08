@@ -65,6 +65,11 @@ def usage_command(
     users: str = typer.Option(
         None,
         help="Comma separated list of user names to filter usage by"
+    ),
+    quota: int = typer.Option(
+        None,
+        help="DAILY quota of GPU hours, if used your quota utilisation will be"
+             " printed"
     )
 ) -> None:
     # Ensure list arguments are lists. Typer actually returns tuples. See
@@ -86,7 +91,7 @@ def usage_command(
 
     elapsed_days = (end.date() - start.date()).days
 
-    usage.usage(df, account_list, user_list, elapsed_days, cluster)
+    usage.usage(df, account_list, user_list, elapsed_days, cluster, quota)
 
 
 def main() -> None:
