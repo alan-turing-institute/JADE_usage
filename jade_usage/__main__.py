@@ -58,9 +58,9 @@ def usage_command(
     cluster: data.Cluster = typer.Argument(
         ..., help="Cluster to export data from. One of 'jade' or 'jade2'"
     ),
-    account: list[str] = typer.Option(
+    accounts: str = typer.Option(
         None,
-        help="Account to filter usage by, can be specified multiple times"
+        help="Comma separated list of accounts to filter usage by"
     ),
     user: list[str] = typer.Option(
         None,
@@ -70,7 +70,10 @@ def usage_command(
     # Ensure list arguments are lists. Typer actually returns tuples. See
     # https://github.com/tiangolo/typer/issues/127
     files = list(files)
-    accounts = list(account)
+    if accounts is None:
+        accounts_list = []
+    else:
+        accounts_list = accounts.split(",")
     users = list(user)
 
     df = data.import_csv(files)
@@ -78,7 +81,7 @@ def usage_command(
 
     elapsed_days = (end.date() - start.date()).days
 
-    usage.usage(df, accounts, users, elapsed_days, cluster)
+    usage.usage(df, accounts_list, users, elapsed_days, cluster)
 
 
 def main() -> None:
