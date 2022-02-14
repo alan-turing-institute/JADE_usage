@@ -120,10 +120,10 @@ def report(usage: pd.DataFrame, elapsed_days: int,
         gpu_hours_total / elapsed_days / JADE_DAILY_CAPACITY
     )
 
-    print(f"Total selected GPU hours: {gpu_hours:.2f}")
-    print(f"Total selected utilisation: {selected_utilisation*100:.2f}%")
-    print(f"Total JADE GPU hours: {gpu_hours_total:.2f}")
-    print(f"Total JADE utilisation: {total_utilisation*100:.2f}%")
+    print(f"Selected GPU hours used: {gpu_hours:.2f}")
+    print(f"Selected utilisation: {selected_utilisation*100:.2f}%")
+    print(f"Total GPU hours used: {gpu_hours_total:.2f}")
+    print(f"Total utilisation: {total_utilisation*100:.2f}%")
     if quota:
         quota_utilisation = (
             gpu_hours / elapsed_days / quota
