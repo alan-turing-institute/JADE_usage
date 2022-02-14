@@ -46,6 +46,11 @@ def _get_usage_by(df: pd.DataFrame, column: str) -> pd.DataFrame:
         gpu_hours_user = _gpu_hours(df[df[column] == value])
         usage.append((value, gpu_hours_user))
     usage_df = pd.DataFrame(usage, columns=[column, "Usage/GPUh"])
+
+    total_usage = usage_df["Usage/GPUh"].sum()
+    usage_df["Usage/%"] = usage_df["Usage/GPUh"].apply(lambda x:
+                                                       x/total_usage*100)
+
     usage_df.sort_values("Usage/GPUh", ascending=False, inplace=True)
 
     return usage_df
