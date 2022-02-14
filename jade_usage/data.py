@@ -107,7 +107,7 @@ def fetch(user: str, start: date, end: date) -> pd.DataFrame:
         )
 
     # Remove jobs with no GPUs allocated
-    df = df[df.AllocGRES.notna()]
+    df = df.query("AllocGRES.notna()")
 
     return df
 

@@ -43,7 +43,7 @@ def _get_usage_by(df: pd.DataFrame, column: str) -> pd.DataFrame:
     unique = list(df[column].unique())
     usage = []
     for value in unique:
-        gpu_hours_user = _gpu_hours(df[df[column] == value])
+        gpu_hours_user = _gpu_hours(df.query(f"{column} == @value"))
         usage.append((value, gpu_hours_user))
     usage_df = pd.DataFrame(usage, columns=[column, "Usage/GPUh"])
 
@@ -78,17 +78,15 @@ def report(usage: pd.DataFrame, elapsed_days: int,
 
     # Filter by account prefix
     if account_prefix:
-        usage = usage[
-            usage.Account.apply(lambda x: str(x).startswith(account_prefix))
-        ]
+        usage = usage.query("Account.str.startswith(@account_prefix)")
 
     # Filter by accounts
     if accounts:
-        usage = usage[usage.Account.isin(accounts)]
+        usage = usage.query("Account.isin(@accounts)")
 
     # Filter by user names
     if users:
-        usage = usage[usage.User.isin(users)]
+        usage = usage.query("User.isin(@users)")
     else:
         users = list(usage.User.unique())
 
