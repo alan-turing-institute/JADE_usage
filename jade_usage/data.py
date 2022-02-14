@@ -177,7 +177,7 @@ def import_csv(infile: list[Path]) -> pd.DataFrame:
     Args:
         infile: paths of the files to import
     """
-    return pd.concat([_get_dataframe(f) for f in infile])
+    return pd.concat((_get_dataframe(f) for f in infile))
 
 
 def filter_dates(df: pd.DataFrame, start: date, end: date) -> pd.DataFrame:
