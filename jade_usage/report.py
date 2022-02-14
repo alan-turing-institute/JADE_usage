@@ -51,20 +51,22 @@ def _get_usage_by(df: pd.DataFrame, column: str) -> pd.DataFrame:
     return usage_df
 
 
-def usage(usage: pd.DataFrame, accounts: Optional[list[str]],
-          users: Optional[list[str]], elapsed_days: int,
-          quota: Optional[int] = None) -> None:
+def report(usage: pd.DataFrame, elapsed_days: int, accounts:
+           Optional[list[str]], users: Optional[list[str]], quota:
+           Optional[int] = None) -> None:
     """
-    Determine usage from the data in a DataFrame
+    Produce usage report using the data in a DataFrame
 
     Args:
         usage: A Pandas DataFrame containing usage data, like that produced by
             fetch.
+        elapsed_days: The number of days covered in the dataframe.
         accounts: A list of accounts to include in the usage report. If None,
             all accounts are included.
         users: A list of users to include in the usage report. If None, all
             accounts are included.
-        elapsed_days: The number of days covered in the dataframe.
+        quota: User defined daily GPU hour quota. If supplied utilisation
+            against this quota will be reported.
     """
     usage_total = usage
 

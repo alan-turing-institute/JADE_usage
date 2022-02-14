@@ -1,5 +1,5 @@
 from . import data
-from . import usage
+from . import report
 from datetime import datetime
 from pathlib import Path
 import typer
@@ -40,11 +40,11 @@ def export_command(
 
 
 @app.command(
-    "usage",
-    help=("Display GPU hour usage per user, optionally filtered by a list"
+    "report",
+    help=("Display a report of GPU hour usage, optionally filtered by a list"
           " of usernames or accounts")
 )
-def usage_command(
+def report_command(
     start: datetime = start_argument,
     end: datetime = end_argument,
     files: list[Path] = typer.Argument(
@@ -85,7 +85,7 @@ def usage_command(
 
     elapsed_days = (end.date() - start.date()).days
 
-    usage.usage(df, account_list, user_list, elapsed_days, quota)
+    report.report(df, elapsed_days, account_list, user_list, quota)
 
 
 def main() -> None:
