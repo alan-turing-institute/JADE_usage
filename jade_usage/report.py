@@ -100,13 +100,14 @@ def report(usage: pd.DataFrame, elapsed_days: int,
     # Add group column to usage data
     usage = usage.assign(Group=usage.User.apply(_get_group))
 
-    # Get GPU hours per user, group and account
+    # Get GPU hours per user, group, account and allocated resources
     user_df = _get_usage_by(usage, "User")
     group_df = _get_usage_by(usage, "Group")
     account_df = _get_usage_by(usage, "Account")
+    gres_df = _get_usage_by(usage, "AllocGRES")
 
     # Print human readable summary of usage DataFrames
-    for df in [user_df, group_df, account_df]:
+    for df in [user_df, group_df, account_df, gres_df]:
         print(
             tabulate(df, headers="keys", showindex=False, tablefmt="github"),
             end="\n\n"
