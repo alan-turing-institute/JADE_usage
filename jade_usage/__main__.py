@@ -52,13 +52,17 @@ def report_command(
         help=("A file, or list of files, containing usage data in the format"
               " created by the export command")
     ),
+    account_prefix: str = typer.Option(
+        None,
+        help="Prefix of accounts to select"
+    ),
     accounts: str = typer.Option(
         None,
-        help="Comma separated list of accounts to filter usage by"
+        help="Comma separated list of accounts to select"
     ),
     users: str = typer.Option(
         None,
-        help="Comma separated list of user names to filter usage by"
+        help="Comma separated list of user names to select"
     ),
     quota: int = typer.Option(
         None,
@@ -85,7 +89,8 @@ def report_command(
 
     elapsed_days = (end.date() - start.date()).days
 
-    report.report(df, elapsed_days, account_list, user_list, quota)
+    report.report(df, elapsed_days, account_prefix, account_list, user_list,
+                  quota)
 
 
 def main() -> None:
