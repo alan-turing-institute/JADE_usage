@@ -27,9 +27,6 @@ def export_command(
     start: datetime = start_argument,
     end: datetime = end_argument,
     user: str = typer.Argument(..., help="Username to attempt to login with"),
-    cluster: data.Cluster = typer.Argument(
-        ..., help="Cluster to export data from. One of 'jade' or 'jade2'"
-    ),
     output_dir: Path = typer.Option(
         "./",
         exists=True,
@@ -39,7 +36,7 @@ def export_command(
         help="Directory to write usage data files to, (default: ./)"
     )
 ) -> None:
-    data.export(cluster, user, start.date(), end.date(), output_dir)
+    data.export(user, start.date(), end.date(), output_dir)
 
 
 @app.command(
@@ -54,9 +51,6 @@ def usage_command(
         ...,
         help=("A file, or list of files, containing usage data in the format"
               " created by the export command")
-    ),
-    cluster: data.Cluster = typer.Argument(
-        ..., help="Cluster to export data from. One of 'jade' or 'jade2'"
     ),
     accounts: str = typer.Option(
         None,
@@ -91,7 +85,7 @@ def usage_command(
 
     elapsed_days = (end.date() - start.date()).days
 
-    usage.usage(df, account_list, user_list, elapsed_days, cluster, quota)
+    usage.usage(df, account_list, user_list, elapsed_days, quota)
 
 
 def main() -> None:
