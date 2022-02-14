@@ -185,7 +185,7 @@ def filter_dates(df: pd.DataFrame, start: date, end: date) -> pd.DataFrame:
     start = datetime.combine(start, datetime.min.time())
     end = datetime.combine(end, datetime.min.time())
 
-    df = df[df.Start >= start]
-    df = df[df.End <= end]
+    df = df.query("Start >= @start")\
+           .query("End <= @end")
 
     return df
