@@ -1,6 +1,5 @@
 from __future__ import annotations
 from datetime import date, datetime
-from enum import Enum
 from io import StringIO
 import pandas as pd  # type: ignore
 from pathlib import Path
@@ -11,16 +10,7 @@ FORMAT = ("jobid,jobname,account,user,partition,nodelist,reqgres,allocgres,"
           "state,exitcode,elapsed,submit,start,end")
 DELIMITER = "|"
 
-
-class Cluster(Enum):
-    jade = "jade"
-    jade2 = "jade2"
-
-
-JADE_ADDRESS = {
-    Cluster.jade: "jade.hartree.stfc.ac.uk",
-    Cluster.jade2: "jade2.hartree.stfc.ac.uk"
-}
+JADE_ADDRESS = "jade2.hartree.stfc.ac.uk"
 
 
 def _elapsed(sacct_elapsed: str) -> pd.Timedelta:
@@ -43,12 +33,11 @@ def _elapsed(sacct_elapsed: str) -> pd.Timedelta:
                         seconds=seconds)
 
 
-def fetch(cluster: Cluster, user: str, start: date, end: date) -> pd.DataFrame:
+def fetch(user: str, start: date, end: date) -> pd.DataFrame:
     """
     Fetch usage data from JADE using the 'sacct' command over SSH.
 
     Args:
-        cluster: The cluster to fetch data from.
         user: The username to attempt to login as.
         start: The earliest date to get usage for.
         end: The latest date to get usage for.
@@ -62,7 +51,7 @@ def fetch(cluster: Cluster, user: str, start: date, end: date) -> pd.DataFrame:
 
     # Get job data
     result = run(["ssh",
-                  f"{user}@{JADE_ADDRESS[cluster]}",
+                  f"{user}@{JADE_ADDRESS}",
                   "sacct",
                   # Get job data for all users
                   "--allusers",
@@ -137,8 +126,7 @@ class FetchError(Exception):
         super().__init__(message)
 
 
-def export(cluster: Cluster, user: str, start: date, end: date,
-           output_dir: Path) -> None:
+def export(user: str, start: date, end: date, output_dir: Path) -> None:
     """
     Export usage data from JADE to a 'csv' file (although the delimiter is
     '|'). The data is written to a file named {start}-{end}_usage.csv
@@ -146,7 +134,6 @@ def export(cluster: Cluster, user: str, start: date, end: date,
     This function uses fetch.
 
     Args:
-        cluster: Cluster to fetch data from
         user: Username to attempt to login as
         start: Earliest date to get usage for
         end: Latest date to get usage for
@@ -154,7 +141,7 @@ def export(cluster: Cluster, user: str, start: date, end: date,
     """
     filename = f"{start}-{end}_usage.csv"
 
-    df = fetch(cluster, user, start, end)
+    df = fetch(user, start, end)
     df.to_csv(output_dir/filename, sep=DELIMITER, index=False)
 
 

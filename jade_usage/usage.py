@@ -2,13 +2,9 @@ from __future__ import annotations
 import pandas as pd  # type: ignore
 from tabulate import tabulate
 from typing import Optional
-from .data import Cluster
 
 
-JADE_DAILY_CAPACITY = {
-    Cluster.jade: 4224,
-    Cluster.jade2: 12096
-}
+JADE_DAILY_CAPACITY = 12096
 
 
 def _gpu_hours(df: pd.DataFrame) -> float:
@@ -56,7 +52,7 @@ def _get_usage_by(df: pd.DataFrame, column: str) -> pd.DataFrame:
 
 
 def usage(usage: pd.DataFrame, accounts: Optional[list[str]],
-          users: Optional[list[str]], elapsed_days: int, cluster: Cluster,
+          users: Optional[list[str]], elapsed_days: int,
           quota: Optional[int] = None) -> None:
     """
     Determine usage from the data in a DataFrame
@@ -108,11 +104,11 @@ def usage(usage: pd.DataFrame, accounts: Optional[list[str]],
         )
 
     selected_utilisation = (
-        gpu_hours / elapsed_days / JADE_DAILY_CAPACITY[cluster]
+        gpu_hours / elapsed_days / JADE_DAILY_CAPACITY
     )
 
     total_utilisation = (
-        gpu_hours_total / elapsed_days / JADE_DAILY_CAPACITY[cluster]
+        gpu_hours_total / elapsed_days / JADE_DAILY_CAPACITY
     )
 
     print(f"Total selected GPU hours: {gpu_hours:.2f}")

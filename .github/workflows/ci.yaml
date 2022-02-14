@@ -6,24 +6,50 @@ on:
   pull_request:
 
 jobs:
-  ci:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+      - name: Setup Poetry
+        uses: abatilo/actions-poetry@v2.1.4
+      - name: Install dependencies
+        run: poetry install
+      - name: Lint
+        run: poetry run flake8 --count --show-source --statistics
+
+  mypy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+      - name: Setup Poetry
+        uses: abatilo/actions-poetry@v2.1.4
+      - name: Install dependencies
+        run: poetry install
+      - name: Check static typing
+        run: poetry run mypy --strict --pretty ./jade_usage
+
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: ['3.7', '3.8', '3.9', '3.10']
+
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Build
-        run: pip install .
-      - name: Install test dependencies
-        run: |
-          pip install flake8 mypy pytest pytest-cov
-      - name: Lint
-        run: flake8 --count --show-source --statistics
-      - name: Check static typing
-        run: mypy --strict --pretty ./jade_usage
+      - name: Setup Poetry
+        uses: abatilo/actions-poetry@v2.1.4
+      - name: Install dependencies
+        run: poetry install
       - name: Test
-        run: pytest -v --cov=./jade_usage
+        run: poetry run pytest -v --cov=./jade_usage
