@@ -87,8 +87,6 @@ def report(usage: pd.DataFrame, elapsed_days: int,
     # Filter by user names
     if users:
         usage = usage.query("User.isin(@users)")
-    else:
-        users = list(usage.User.unique())
 
     # Ensure usage DataFrame is not empty before continuing
     if usage.empty:
