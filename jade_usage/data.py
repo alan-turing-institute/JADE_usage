@@ -107,7 +107,7 @@ def fetch(user: str, start: date, end: date) -> pd.DataFrame:
         )
 
     # Remove jobs with no GPUs allocated
-    df = df[df.AllocGRES.notna()]
+    df = df.query("AllocGRES.notna()")
 
     return df
 
@@ -177,7 +177,7 @@ def import_csv(infile: list[Path]) -> pd.DataFrame:
     Args:
         infile: paths of the files to import
     """
-    return pd.concat([_get_dataframe(f) for f in infile])
+    return pd.concat((_get_dataframe(f) for f in infile))
 
 
 def filter_dates(df: pd.DataFrame, start: date, end: date) -> pd.DataFrame:
@@ -185,7 +185,7 @@ def filter_dates(df: pd.DataFrame, start: date, end: date) -> pd.DataFrame:
     start = datetime.combine(start, datetime.min.time())
     end = datetime.combine(end, datetime.min.time())
 
-    df = df[df.Start >= start]
-    df = df[df.End <= end]
+    df = df.query("Start >= @start")\
+           .query("End <= @end")
 
     return df
