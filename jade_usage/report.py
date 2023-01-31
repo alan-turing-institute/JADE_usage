@@ -41,6 +41,11 @@ def _get_usage_by(df: pd.DataFrame, column: str) -> pd.DataFrame:
 
     usage_df.sort_values("gpuh", ascending=False, inplace=True)
 
+    usage_df = usage_df.rename(columns={
+        "gpuh": "Usage / GPUh",
+        "gpupercent": "Usage / %"
+    })
+
     return usage_df
 
 
@@ -93,10 +98,11 @@ def report(usage: pd.DataFrame, elapsed_days: int,
     user_df = _get_usage_by(usage, "User")
     group_df = _get_usage_by(usage, "Group")
     account_df = _get_usage_by(usage, "Account")
-    tres_df = _get_usage_by(usage, "ngpu")
+    gpu_df = _get_usage_by(usage, "ngpu")
+    gpu_df = gpu_df.rename_axis("GPUs")
 
     # Print human readable summary of usage DataFrames
-    for df in [user_df, group_df, account_df, tres_df]:
+    for df in [user_df, group_df, account_df, gpu_df]:
         print(
             tabulate(df, headers="keys", showindex=True, tablefmt="github"),
             end="\n\n"
