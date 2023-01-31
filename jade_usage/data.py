@@ -3,10 +3,11 @@ from datetime import date, datetime
 from io import StringIO
 import pandas as pd  # type: ignore
 from pathlib import Path
+import re
 from subprocess import run, CompletedProcess
 from typing import Any
 
-FORMAT = ("jobid,jobname,account,user,partition,nodelist,reqgres,allocgres,"
+FORMAT = ("jobid,jobname,account,user,partition,nodelist,reqtres,alloctres,"
           "state,exitcode,elapsed,submit,start,end")
 DELIMITER = "|"
 
@@ -106,9 +107,6 @@ def fetch(user: str, start: date, end: date) -> pd.DataFrame:
         infer_datetime_format=True,
         )
 
-    # Remove jobs with no GPUs allocated
-    df = df.query("AllocGRES.notna()")
-
     return df
 
 
@@ -189,3 +187,41 @@ def filter_dates(df: pd.DataFrame, start: date, end: date) -> pd.DataFrame:
            .query("End <= @end")
 
     return df
+
+
+def gpu_hours_column(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Create a GPU hours column containing the GPU hour usage for each row.
+
+    This accounts for the old style GRES columns and the new style TRES columns
+    """
+
+    # Old style
+    # AllocGRES has format 'gpu:i' where i is the number of GPUS
+    old_gpus = df['AllocGRES'].apply(
+        lambda x: 0 if pd.isna(x) else int(x.split(':')[-1])
+    )
+
+    # New style
+    # AllocTRES is a comma separated string which may contain 'gres/gpu=i'
+    new_gpus = df['AllocTRES'].apply(
+        lambda x: 0 if pd.isna(x) else _new_gpu(x)
+    )
+
+    df = df.assign(ngpu=old_gpus+new_gpus)
+
+    seconds_per_hour = 60.**2
+    df = df.assign(gpuh=df['ngpu'] * df['Elapsed'].apply(
+        lambda x: x.total_seconds() / seconds_per_hour
+    ))
+
+    return df
+
+
+m = re.compile(r'gres/gpu=(\d+)')
+
+
+def _new_gpu(tres_string: str) -> int:
+    res = m.search(tres_string)
+
+    return 0 if res is None else int(res.group(1))

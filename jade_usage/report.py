@@ -7,18 +7,6 @@ from typing import Optional
 JADE_DAILY_CAPACITY = 12096
 
 
-def _gpu_hours(df: pd.DataFrame) -> float:
-    seconds_per_hour = 60.**2
-
-    # Multiply the number of GPUs allocated (from the AllocGRES column) by the
-    # elapsed number of hours
-    GPU_hours = sum(
-        df.AllocGRES.apply(lambda x: int(x[-1]))
-        * df.Elapsed.apply(lambda x: x.total_seconds() / seconds_per_hour)
-        )
-    return GPU_hours
-
-
 def _get_group(username: str) -> str:
     """
     Get the group from a username
@@ -40,18 +28,18 @@ def _get_usage_by(df: pd.DataFrame, column: str) -> pd.DataFrame:
         column: Header of the column
     """
 
-    unique = list(df[column].unique())
-    usage = []
-    for value in unique:
-        gpu_hours_user = _gpu_hours(df.query(f"{column} == @value"))
-        usage.append((value, gpu_hours_user))
-    usage_df = pd.DataFrame(usage, columns=[column, "Usage/GPUh"])
+    # Sum GPUh for unique values in 'column'
+    usage_df = df[[column, 'gpuh']].groupby(column).sum()
 
-    total_usage = usage_df["Usage/GPUh"].sum()
-    usage_df["Usage/%"] = usage_df["Usage/GPUh"].apply(lambda x:
-                                                       x/total_usage*100)
+    # Get total GPUh for every entry
+    total_usage = usage_df['gpuh'].sum()
 
-    usage_df.sort_values("Usage/GPUh", ascending=False, inplace=True)
+    # Add column for % usage
+    usage_df = usage_df.assign(gpupercent=usage_df['gpuh'].apply(
+        lambda x: x/total_usage*100
+    ))
+
+    usage_df.sort_values("gpuh", ascending=False, inplace=True)
 
     return usage_df
 
@@ -94,9 +82,9 @@ def report(usage: pd.DataFrame, elapsed_days: int,
         return
 
     # Get total GPU hours for selected users/accounts
-    gpu_hours = _gpu_hours(usage)
+    gpu_hours = usage['gpuh'].sum()
     # Get GPU hours for ALL of JADE
-    gpu_hours_total = _gpu_hours(usage_total)
+    gpu_hours_total = usage_total['gpuh'].sum()
 
     # Add group column to usage data
     usage = usage.assign(Group=usage.User.apply(_get_group))
@@ -105,12 +93,12 @@ def report(usage: pd.DataFrame, elapsed_days: int,
     user_df = _get_usage_by(usage, "User")
     group_df = _get_usage_by(usage, "Group")
     account_df = _get_usage_by(usage, "Account")
-    gres_df = _get_usage_by(usage, "AllocGRES")
+    tres_df = _get_usage_by(usage, "ngpu")
 
     # Print human readable summary of usage DataFrames
-    for df in [user_df, group_df, account_df, gres_df]:
+    for df in [user_df, group_df, account_df, tres_df]:
         print(
-            tabulate(df, headers="keys", showindex=False, tablefmt="github"),
+            tabulate(df, headers="keys", showindex=True, tablefmt="github"),
             end="\n\n"
         )
 

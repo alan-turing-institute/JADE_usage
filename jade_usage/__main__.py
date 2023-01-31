@@ -86,6 +86,7 @@ def report_command(
 
     df = data.import_csv(files)
     df = data.filter_dates(df, start.date(), end.date())
+    df = data.gpu_hours_column(df)
 
     elapsed_days = (end.date() - start.date()).days
 
