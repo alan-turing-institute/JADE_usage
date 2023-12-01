@@ -34,6 +34,10 @@ def _elapsed(sacct_elapsed: str) -> pd.Timedelta:
                         seconds=seconds)
 
 
+def _remove_delimiter(string: str) -> str:
+    return string.replace(DELIMITER, '')
+
+
 def fetch(user: str, start: date, end: date) -> pd.DataFrame:
     """
     Fetch usage data from JADE using the 'sacct' command over SSH.
@@ -89,7 +93,8 @@ def fetch(user: str, start: date, end: date) -> pd.DataFrame:
     f.seek(0)
     # Declare columns to convert. Cast Elapsed column as a Timedelta
     converters = {
-        'Elapsed': _elapsed
+        'Elapsed': _elapsed,
+        'JobName': _remove_delimiter
         }
     # Declare columns to parse as Datetime objects
     date_columns = [
